@@ -1,3 +1,6 @@
+addpath(genpath('./data_in/'));
+addpath(genpath('./libs/'));
+
 N = 4; % number of variables in one time slice (2 + number of contextual attributes. Can be derived dynamically from the data set)
 
 % name the variables for easier access
@@ -20,7 +23,7 @@ inter(Context1, State) = 1; %always the same, can be created automatically
 inter(Context2, State) = 1; %always the same, can be created automatically
 
 % Read in the data. 
-data = import_csv('data.csv');
+data = import_csv('./example/data.csv');
 data = num2cell(data);
 [datlen datn] = size(data); 
 
