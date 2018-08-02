@@ -1,9 +1,11 @@
+%Import required files/functions/libraries
 addpath(genpath('./data_in/'));
 addpath(genpath('./libs/'));
 
 %Load data set
 %TODO: The import only works currently for the example/data.csv file but is not generic
-%Input Required: only discrete attributes
+%TODO: Make import parse timestamp as a real date/time
+%Input Required: only discrete attributes (including timestamp!)
 %Structure: Column 1 = CaseID, Column 2 = Activity, Column 3 = Timestamp Column 4-n = Context Attributes
 data = import_csv('./example/data.csv'); 
 
@@ -27,7 +29,7 @@ unique_values{i} = Q; %replace cases count by number of states
 
 % Split data by case, remove case id and save in cell array
  [~,~,X] = unique(data(:,1));
- data(:,1) = [];
+ data(:,1) = []; %remove CaseID
  data_cell = accumarray(X,1:size(data,1),[],@(r){data(r,:)});
  
 %Define model
@@ -69,9 +71,11 @@ end
 % different number of incoming arcs, and therefore cannot be in the same
 % eclass. 
 
+
+eclass1 = 1:N; % first time slice, all nodes have their own eclass
 %TODO: we really have to check how this should be in our case!
-eclass1 = 1:N; % first time slice
-eclass2 = (N+1):(2*N);% consecutive time slices
+%see http://bayesnet.github.io/bnt/docs/usage.html#tying and http://bayesnet.github.io/bnt/docs/usage_dbn.html#hmm
+eclass2 = (N+1):(2*N);% consecutive time slices,
 eclass = [eclass1 eclass2];
  
 % Make the model
@@ -85,6 +89,11 @@ for j = 1:5
 
     %CPDs. TODO!
     
+    for i=1:2*N
+        bnet.CPD{i} = tabular_CPD(bnet, i);
+    end
+
+    %Example for HMM
     % Set the priors 
 %    prior0 = normalise(rand(Q,1));
 %    transmat0 = mk_stochastic(rand(Q,Q));
@@ -93,6 +102,13 @@ for j = 1:5
   %  bnet.CPD{2} = tabular_CPD(bnet, 2, obsmat0);
    % bnet.CPD{3} = tabular_CPD(bnet, 3, transmat0);
    
+   %Example from Paper
+       % Set the priors: randomly drawn from N(0,1), with diagonal covariance matrices
+ %   for i = 1:(2*N)
+  %      bnet.CPD{i} = gaussian_CPD(bnet, i, 'cov_type', 'diag');
+  %  end
+  
+  
  %   for i = 1:(2*N)
 	%	k = ns(i);
      %   p = 1; %If p << 1, this encourages "deterministic" CPTs (one entry near 1, the rest near 0). If p = 1, each entry is drawn from U[0,1]. If p >> 1, the entries will all be near 1/k, where k is the arity of this node, i.e., each row will be nearly uniform. 
@@ -104,7 +120,7 @@ for j = 1:5
     
     %Junction tree learning engine for parameter learning
     engine = smoother_engine(jtree_2TBN_inf_engine(bnet));
-	%engine = enter_evidence(engine, data);
+
 	%m = marginal_nodes(engine, nodes, t);
     
 	
@@ -115,9 +131,9 @@ for j = 1:5
     for i=1:ncases
       T = length(data_cell{i});
       cases{i} = cell(N,T);
-      cases{i}(onodes,:) =  cellstr(transpose(data_cell{i}));
+      cases{i}(onodes,:) =  cellstr(transpose(data_cell{i})); %transpose as each column is expected to be a time slice
     end
-
+    
 	[bnet2, LLtrace] = learn_params_dbn_em(engine, cases, 'max_iter', 500);
     loglik = LLtrace(length(LLtrace));
 	
