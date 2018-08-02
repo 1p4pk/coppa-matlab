@@ -3,13 +3,14 @@
 addpath(genpath('./data_in/'));
 addpath(genpath('./libs/'));
 addpath(genpath('./examples/'));
+
 %%
 %Load data set
 %TODO: The import only works currently for the example/data.csv file but is not generic
 %TODO: Make import parse timestamp as a real date/time
 %Input Required: only discrete attributes (including timestamp!)
 %Structure: Column 1 = CaseID, Column 2 = Activity, Column 3 = Timestamp Column 4-n = Context Attributes
-data = import_csv('./example/data.csv'); 
+data = import_csv('./example/data_num.csv'); 
 
 data = sortrows(data,[1,3]) %Make sure log is sorted by CaseID and Timestamp
 data(:,3) = []; %Remove Timestamp Column as it is not needed anymore
@@ -17,7 +18,9 @@ data(:,3) = []; %Remove Timestamp Column as it is not needed anymore
 %Get info from data
 [datlen datn] = size(data); %datlen = number of rows, datn = number of columns
 
-   
+%data = categorical(data);
+data = double(data);
+
 % Determine dimensions for each attribute in log
 unique_values = cell(1,datn)
 for i=1:datn
@@ -26,7 +29,7 @@ end
 
 ncases = unique_values{1}; % get number of cases from log
 Q = 2; % num hidden states %input from user
-unique_values{i} = Q; %replace cases count by number of states
+unique_values{1} = Q; %replace cases count by number of states
 ns = cell2mat(unique_values);%number of states
 
 % Split data by case, remove case id and save in cell array
@@ -79,7 +82,7 @@ end
 eclass1 = 1:N; % first time slice, all nodes have their own eclass
 %TODO: we really have to check how this should be in our case!
 %see http://bayesnet.github.io/bnt/docs/usage.html#tying and http://bayesnet.github.io/bnt/docs/usage_dbn.html#hmm
-eclass2 = (N+1):(2*N);% consecutive time slices,
+eclass2 = [(N+1),2:N];% consecutive time slices,
 eclass = [eclass1 eclass2];
  
 % Make the model
@@ -125,7 +128,7 @@ for j = 1:5
  %% 
     
     %Junction tree learning engine for parameter learning
-    engine = smoother_engine(jtree_2TBN_inf_engine(bnet));
+    engine = jtree_dbn_inf_engine(bnet);
 
 	%m = marginal_nodes(engine, nodes, t);
     
@@ -136,9 +139,9 @@ for j = 1:5
     cases = cell(1, ncases);
     for i=1:ncases
       T = length(data_cell{i});
-      ev = cellstr(transpose(data_cell{i})); %transpose as each column is expected to be a time slice
+      ev = transpose(data_cell{i}); %transpose as each column is expected to be a time slice
       cases{i} = cell(N,T);
-      cases{i}(onodes,:) =  ev(onodes, :); 
+      cases{i}(onodes,:) =  num2cell(ev(onodes, :)); 
     end
     
 	[bnet2, LLtrace] = learn_params_dbn_em(engine, cases, 'max_iter', 500);
