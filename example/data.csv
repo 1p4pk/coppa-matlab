@@ -1,0 +1,13 @@
+Activity,Ressource,Critical
+A,Tim,no
+B,Kate,no
+C,Kate,no
+D,Tim,no
+A,Tim,yes
+B,Kate,yes
+D,Paul,yes
+C,Paul,yes
+A,Tim,no
+B,Kate,no
+C,Kate,no
+D,Paul,no

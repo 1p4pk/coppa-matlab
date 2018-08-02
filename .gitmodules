@@ -1,1 +1,4 @@
 
+[submodule "libs/bnt"]
+	path = libs/bnt
+	url = https://github.com/bayesnet/bnt.git
