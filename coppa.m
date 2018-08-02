@@ -1,7 +1,9 @@
+%% 
 %Import required files/functions/libraries
 addpath(genpath('./data_in/'));
 addpath(genpath('./libs/'));
-
+addpath(genpath('./examples/'));
+%%
 %Load data set
 %TODO: The import only works currently for the example/data.csv file but is not generic
 %TODO: Make import parse timestamp as a real date/time
@@ -11,7 +13,7 @@ data = import_csv('./example/data.csv');
 
 data = sortrows(data,[1,3]) %Make sure log is sorted by CaseID and Timestamp
 data(:,3) = []; %Remove Timestamp Column as it is not needed anymore
-
+%% 
 %Get info from data
 [datlen datn] = size(data); %datlen = number of rows, datn = number of columns
 
@@ -25,12 +27,14 @@ end
 ncases = unique_values{1}; % get number of cases from log
 Q = 2; % num hidden states %input from user
 unique_values{i} = Q; %replace cases count by number of states
-%ns = cell2mat(unique_values);%number of states
+ns = cell2mat(unique_values);%number of states
 
 % Split data by case, remove case id and save in cell array
  [~,~,X] = unique(data(:,1));
- data(:,1) = []; %remove CaseID
+ data(:,1) =  string(missing); %remove CaseID and create empty values for hidden state
  data_cell = accumarray(X,1:size(data,1),[],@(r){data(r,:)});
+ 
+ %% 
  
 %Define model
 N = datn -1 + 1; % number of variables in one time slice. datn + 1 (for hidden state) -1 (for case id column)
@@ -80,13 +84,14 @@ eclass = [eclass1 eclass2];
  
 % Make the model
 bnet = mk_dbn(intra, inter, ns, 'discrete', dnodes, 'eclass1', eclass1, 'eclass2', eclass2);
+%% 
 
 % Loop over the EM learning 100 times, keep the best model (based on
 % log-likelihood), to avoid getting a model that has got stuck to a por local optimum
 rng('shuffle') %init the random number generator based on time stamp
 bestloglik = -inf; %initialize
 for j = 1:5
-
+    %% 
     %CPDs. TODO!
     
     for i=1:2*N
@@ -117,6 +122,7 @@ for j = 1:5
 %		CPT = dirichlet_sample(p*ones(1,k), psz);
 %		bnet.CPD{i} = tabular_CPD(bnet, i,'prior_type','dirichlet'); %, 'CPT', CPT);
  %   end
+ %% 
     
     %Junction tree learning engine for parameter learning
     engine = smoother_engine(jtree_2TBN_inf_engine(bnet));
@@ -130,8 +136,9 @@ for j = 1:5
     cases = cell(1, ncases);
     for i=1:ncases
       T = length(data_cell{i});
+      ev = cellstr(transpose(data_cell{i})); %transpose as each column is expected to be a time slice
       cases{i} = cell(N,T);
-      cases{i}(onodes,:) =  cellstr(transpose(data_cell{i})); %transpose as each column is expected to be a time slice
+      cases{i}(onodes,:) =  ev(onodes, :); 
     end
     
 	[bnet2, LLtrace] = learn_params_dbn_em(engine, cases, 'max_iter', 500);
