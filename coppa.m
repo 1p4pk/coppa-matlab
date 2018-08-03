@@ -47,5 +47,8 @@ end
 %save the bestbnet object
 save('bestbnet_allHVs.mat','bestbnet')
 
+%example_evidence = sample_dbn(bestbnet, 4);
+%prediction(bestbnet, example_evidence, 1);
+
 G = bestbnet.dag;
 draw_graph(G);
