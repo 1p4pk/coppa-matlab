@@ -1,4 +1,4 @@
-function [data_cell,ncases,ns,datn] = prepare_data(data,timestamp_format,CaseID,Timestamp,Activity)
+function [dataTraining,dataTesting,ns,datn] = prepare_data(data,timestamp_format,CaseID,Timestamp,Activity,x)
 %PREPARE_DATA Summary of this function goes here
 %   Detailed explanation goes here
 %Convert Timestamp
@@ -46,5 +46,14 @@ ns = cell2mat(unique_values);%number of states
  data_num(:,1) =  string(missing); %remove CaseID and create empty values for hidden state
  data_cell = accumarray(X,1:size(data_num,1),[],@(r){data_num(r,:)});
  
+
+p = x/100      % proportion of rows to select for training
+N = size(data_cell,1)  % total number of rows 
+tf = false(N,1)    % create logical index vector
+tf(1:round(p*N)) = true     
+tf = tf(randperm(N))   % randomise order
+dataTraining = data_cell(tf,:) 
+dataTesting = data_cell(~tf,:) 
+
 end
 

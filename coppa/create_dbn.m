@@ -45,7 +45,17 @@ eclass1 = 1:N; % first time slice, all nodes have their own eclass
 eclass2 = [(N+1),2:N];% consecutive time slices,
 eclass = [eclass1 eclass2];
  
+
+%Add node names to beautify
+pre = 'Context';
+names = {};
+names = [names;'Hidden State'];
+names = [names;'Observation'];
+for k = 1:N-2
+    names = [names;strcat([pre,num2str(k)])];
+end
+
 % Make the model
-bnet = mk_dbn(intra, inter, ns, 'discrete', dnodes, 'eclass1', eclass1, 'eclass2', eclass2);
+bnet = mk_dbn(intra, inter, ns, 'discrete', dnodes, 'eclass1', eclass1, 'eclass2', eclass2,'names',names);
 end
 

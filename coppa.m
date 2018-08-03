@@ -16,7 +16,7 @@ filename = './example/data.csv'; delimiter = ';'; timestamp_format = 'yyyy-MM-dd
 data = import_csv(filename, delimiter); 
 
 %Prepare Data
-[data_cell ncases ns datn] = prepare_data(data,timestamp_format,CaseID,Timestamp,Activity); 
+[dataTraining dataTesting ns datn] = prepare_data(data,timestamp_format,CaseID,Timestamp,Activity,70); 
  %% 
 %Define model
 N = datn -1 + 1; % number of variables in one time slice. datn + 1 (for hidden state) -1 (for case id column)
@@ -33,7 +33,7 @@ for j = 1:5
     
     %Start Learning
     
-    [bnet2, LLtrace] = learning(bnet,N,ncases,data_cell)
+    [bnet2, LLtrace] = learning(bnet,N,dataTraining)
 	
     loglik = LLtrace(length(LLtrace));
     %when we find a better model than the previous, write its results into
@@ -47,8 +47,7 @@ end
 %save the bestbnet object
 save('bestbnet_allHVs.mat','bestbnet')
 
-%example_evidence = sample_dbn(bestbnet, 4);
-%prediction(bestbnet, example_evidence, 1);
-
 G = bestbnet.dag;
-draw_graph(G);
+%draw_graph(G);
+
+prediction(bestbnet, dataTesting);
