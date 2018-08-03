@@ -60,8 +60,8 @@ unique_values{1} = Q; %replace cases count by number of states
 ns = cell2mat(unique_values);%number of states
 
 % Split data by case, remove case id and save in cell array
- [~,~,X] = unique(data_num(:,1));
- data_num(:,1) =  string(missing); %remove CaseID and create empty values for hidden state
+ [~,~,X] = unique(data_num(:,CaseID));
+ data_num(:,CaseID) =  string(missing); %remove CaseID and create empty values for hidden state
  data_cell = accumarray(X,1:size(data_num,1),[],@(r){data_num(r,:)});
  
 
