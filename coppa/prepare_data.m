@@ -24,17 +24,24 @@ end
 %Get info from data
 [datlen datn] = size(data); %datlen = number of rows, datn = number of columns
 
-% Convert log to numbers (faster and necessary for algorithm)
-data_num = ones(datlen,datn);
-for i=1:datn
-    data_num(:,i) = double(categorical(data(:,i)));
-end
-
 % Determine dimensions for each attribute in log
-unique_values = cell(1,datn)
+unique_attr = cell(1,datn);
+unique_values = cell(1,datn);
 for i=1:datn
+    unique_attr{i} = sort(unique(data(:,i)));
     unique_values{i} = length(unique(data(:,i)));
 end
+
+% Convert log to numbers (faster and necessary for algorithm)
+data_num = ones(datlen,datn);
+mapping = cell(1,datn);
+for i=1:datn
+    mapping{i} = cell(1,unique_values{i});
+    mapping{i} = cellstr(unique_attr{i});
+    %mapping{i}(1,:) = num2cell(1:unique_values{i});
+    data_num(:,i) = double(categorical(data(:,i)));
+end
+save('mapping_table.mat','mapping');
 
 ncases = unique_values{1}; % get number of cases from log
 Q = 4; % num hidden states %input from user

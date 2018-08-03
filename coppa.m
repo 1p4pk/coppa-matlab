@@ -15,6 +15,7 @@ filename = './example/data.csv'; delimiter = ';'; timestamp_format = 'yyyy-MM-dd
 
 %Load Data
 data = import_csv(filename, delimiter); 
+load('mapping_table.mat');
 
 %Prepare Data
 [dataTraining dataTesting ns datn] = prepare_data(data,timestamp_format,CaseID,Timestamp,Activity,70); 
@@ -24,11 +25,13 @@ N = datn -1 + 1; % number of variables in one time slice. datn + 1 (for hidden s
 bnet = create_dbn(N,ns);
 %% 
 
-bestbnet =  learning(bnet,N,dataTraining,10);
+%bestbnet =  learning(bnet,N,dataTraining,10);
 
 load('bestbnet_allHVs.mat')
 
 G = bestbnet.dag;
 %draw_graph(G);
 
-pred = prediction(bestbnet, dataTesting);
+%pred = prediction(bestbnet, dataTesting);
+
+mapped_value = map_to_name(2,2);
