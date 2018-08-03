@@ -10,16 +10,32 @@ addpath(genpath('./examples/'));
 %TODO: Make import parse timestamp as a real date/time
 %Input Required: only discrete attributes (including timestamp!)
 %Structure: Column 1 = CaseID, Column 2 = Activity, Column 3 = Timestamp Column 4-n = Context Attributes
-data = import_csv('./example/data_num.csv'); 
+%data = import_csv('./example/data.csv'); 
+filename = './example/bpi2013/VINST cases closed problems.csv';
+delimiter = ';';
 
-data = sortrows(data,[1,3]) %Make sure log is sorted by CaseID and Timestamp
-data(:,3) = []; %Remove Timestamp Column as it is not needed anymore
+data = import_csv(filename, delimiter); 
+
+%Specify Columns
+CaseID = 1;
+Activity = 3;
+Timestamp = 2;
+timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX';
+
+%Convert Timestamp
+data(:,Timestamp) = datetime(data(:,Timestamp),'TimeZone','Europe/London','InputFormat',timestamp_format);
+
+data = sortrows(data,[CaseID,Timestamp]) %Make sure log is sorted by CaseID and Timestamp
+data(:,Timestamp) = []; %Remove Timestamp Column as it is not needed anymore
 %% 
 %Get info from data
 [datlen datn] = size(data); %datlen = number of rows, datn = number of columns
 
-%data = categorical(data);
-data = double(data);
+% Convert log to numbers (faster and necessary for algorithm)
+data_num = ones(datlen,datn);
+for i=1:datn
+    data_num(:,i) = double(categorical(data(:,i)));
+end
 
 % Determine dimensions for each attribute in log
 unique_values = cell(1,datn)
@@ -33,9 +49,9 @@ unique_values{1} = Q; %replace cases count by number of states
 ns = cell2mat(unique_values);%number of states
 
 % Split data by case, remove case id and save in cell array
- [~,~,X] = unique(data(:,1));
- data(:,1) =  string(missing); %remove CaseID and create empty values for hidden state
- data_cell = accumarray(X,1:size(data,1),[],@(r){data(r,:)});
+ [~,~,X] = unique(data_num(:,1));
+ data_num(:,1) =  string(missing); %remove CaseID and create empty values for hidden state
+ data_cell = accumarray(X,1:size(data_num,1),[],@(r){data_num(r,:)});
  
  %% 
  
