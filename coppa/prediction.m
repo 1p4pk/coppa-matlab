@@ -20,8 +20,7 @@ prediction = cell(ncases);
 for j=1:ncases
     T = length(evidence{j}); %length of the case
     for i=1:nhd
-        [engine, ll] = enter_evidence(engine, evidence{j});
-        marg = marginal_nodes(engine, i, T+steps); %calculate marginal nodes for hidden state i for steps into the future
+          [engine, ll] = enter_evidence(engine, evidence{j});
+          marg = marginal_nodes(engine, i, T+steps); %calculate marginal nodes for hidden state i for steps into the future 
     end
-    prediction{j} = marg;
 end
