@@ -25,8 +25,8 @@ obsmat0 = mk_stochastic(rand(Q,O));
 engine = smoother_engine(jtree_2TBN_inf_engine(bnet));
 
 ss = 2;%slice size(ss)
-ncases = 10;%number of examples
-T=10;
+ncases = 3;%number of examples
+T=4;
 max_iter=2;%iterations for EM
 cases = cell(1, ncases);
 for i=1:ncases
