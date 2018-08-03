@@ -11,6 +11,7 @@ addpath(genpath('./coppa/'));
 filename = './example/data.csv'; delimiter = ';'; timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; CaseID = 1; Activity = 2; Timestamp = 3;
 %filename = './example/bpi2013/VINST cases closed problems_COPPA.csv';delimiter = ';'; timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; CaseID = 1; Activity = 2; Timestamp = 3;
 %filename = './example/sap/SAP_P2P_COPPA_FULL.csv'; delimiter = ','; timestamp_format = 'yyyy-MM-dd HH:mm:ss.SSSSSSS'; CaseID = 1; Activity = 2; Timestamp = 3;
+%filename = './example/bpi2012/bpi_2012.csv';delimiter = ','; timestamp_format = 'yyyy/MM/dd HH:mm:ss.SSS'; CaseID = 1; Activity = 2; Timestamp = 4;
 
 %Load Data
 data = import_csv(filename, delimiter); 
@@ -23,29 +24,9 @@ N = datn -1 + 1; % number of variables in one time slice. datn + 1 (for hidden s
 bnet = create_dbn(N,ns);
 %% 
 
-% Loop over the EM learning 100 times, keep the best model (based on
-% log-likelihood), to avoid getting a model that has got stuck to a por local optimum
-rng('shuffle') %init the random number generator based on time stamp
-bestloglik = -inf; %initialize
-for j = 1:5
-    
-    disp(['Starting Iteration ' num2str(j)]);
-    
-    %Start Learning
-    
-    [bnet2, LLtrace] = learning(bnet,N,dataTraining)
-	
-    loglik = LLtrace(length(LLtrace));
-    %when we find a better model than the previous, write its results into
-    %file
-    if loglik > bestloglik
-        bestloglik = loglik;
-        bestbnet = bnet2;
-    end
-end
+%bestbnet =  learning(bnet,N,dataTraining,10);
 
-%save the bestbnet object
-save('bestbnet_allHVs.mat','bestbnet')
+load('bestbnet_allHVs.mat')
 
 G = bestbnet.dag;
 %draw_graph(G);
