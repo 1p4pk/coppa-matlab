@@ -10,16 +10,16 @@ addpath(genpath('./examples/'));
 %TODO: Make import parse timestamp as a real date/time
 %Input Required: only discrete attributes (including timestamp!)
 %Structure: Column 1 = CaseID, Column 2 = Activity, Column 3 = Timestamp Column 4-n = Context Attributes
-%data = import_csv('./example/data.csv'); 
-filename = './example/bpi2013/VINST cases closed problems.csv';
+%filename = './example/data.csv';
+filename = './example/bpi2013/VINST cases closed problems_COPPA.csv';
 delimiter = ';';
 
 data = import_csv(filename, delimiter); 
 
 %Specify Columns
 CaseID = 1;
-Activity = 3;
-Timestamp = 2;
+Activity = 2;
+Timestamp = 3;
 timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX';
 
 %Convert Timestamp
@@ -28,6 +28,20 @@ data(:,Timestamp) = datetime(data(:,Timestamp),'TimeZone','Europe/London','Input
 data = sortrows(data,[CaseID,Timestamp]) %Make sure log is sorted by CaseID and Timestamp
 data(:,Timestamp) = []; %Remove Timestamp Column as it is not needed anymore
 %% 
+%Make sure CaseID is first column and Activity second column
+[datlen datn] = size(data);
+ind = [1:datn];
+ind = ind(find(ind~=CaseID));
+ind = ind(find(ind~=Activity));
+data = data(:,[CaseID, Activity, ind]); 
+
+%Allow max q columns, delete rest
+q = 5
+[datlen datn] = size(data);
+if datn>q
+    data(:,[q+1:datn]) = [];
+end
+
 %Get info from data
 [datlen datn] = size(data); %datlen = number of rows, datn = number of columns
 
@@ -110,6 +124,7 @@ bnet = mk_dbn(intra, inter, ns, 'discrete', dnodes, 'eclass1', eclass1, 'eclass2
 rng('shuffle') %init the random number generator based on time stamp
 bestloglik = -inf; %initialize
 for j = 1:5
+    disp(['Starting Iteration ' num2str(j)]);
     %% 
     %CPDs. TODO!
     
@@ -152,14 +167,16 @@ for j = 1:5
 	max_iter=20;%iterations for EM
 
     %prepare structure needed. Each value of each case in a cell
+    disp('Building data structure');
     cases = cell(1, ncases);
     for i=1:ncases
-      T = length(data_cell{i});
+      T = size(data_cell{i},1);
       ev = transpose(data_cell{i}); %transpose as each column is expected to be a time slice
       cases{i} = cell(N,T);
       cases{i}(onodes,:) =  num2cell(ev(onodes, :)); 
     end
     
+    disp('Start Learning');
 	[bnet2, LLtrace] = learn_params_dbn_em(engine, cases, 'max_iter', 500);
     loglik = LLtrace(length(LLtrace));
 	
