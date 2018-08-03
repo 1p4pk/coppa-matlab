@@ -14,6 +14,17 @@ ind = ind(find(ind~=CaseID));
 ind = ind(find(ind~=Activity));
 data = data(:,[CaseID, Activity, ind]); 
 
+% Delete columns with more than 30 different values
+[datlen datn] = size(data);
+del_index = [];
+for i=3:datn
+    k = length(unique(data(:,i)));
+    if k>30
+        del_index = [del_index; i];
+    end
+end
+data(:,del_index) = [];
+
 %Allow max q columns, delete rest
 q = 4;
 [datlen datn] = size(data);
