@@ -31,7 +31,7 @@ fileID = fopen(filename,'r');
 
 z = textscan(fgetl(fileID),'%s','Delimiter',delimiter)
 hdr = size(z{1},1);
-formatSpec = [repmat('%s',1,hdr),'%[^\n\r]'];
+formatSpec = [repmat('%q',1,hdr),'%[^\n\r]'];
 %formatSpec = '%s%s%s%s%s%[^\n\r]';
 
 
