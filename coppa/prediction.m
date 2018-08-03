@@ -14,7 +14,7 @@ engine = jtree_dbn_inf_engine(bnet);
 ss = bnet.nnodes_per_slice; %number of nodes in model
 onodes = 2:ss; % all but the first two (state and activity)
 nhd = bnet.node_sizes_slice(1,1); %node size of hidden state
-evidence = create_evidence(bnet, data, ncases, onodes);
+evidence = create_evidence(bnet, data, onodes); %adjust to remove last event?
 prediction = cell(ncases);
 
 for j=1:ncases
