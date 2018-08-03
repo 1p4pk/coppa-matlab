@@ -23,7 +23,7 @@ N = datn -1 + 1; % number of variables in one time slice. datn + 1 (for hidden s
 bnet = create_dbn(N,ns);
 %% 
 
-bestbnet =  learning(bnet,N,dataTraining,10);
+%bestbnet =  learning(bnet,N,dataTraining,10);
 
 %load('bestbnet_sap_p2p.mat');
 load('bestbnet_data.mat');
