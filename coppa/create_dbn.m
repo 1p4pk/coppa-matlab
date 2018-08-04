@@ -56,6 +56,6 @@ for k = 1:N-2
 end
 
 % Make the model
-bnet = mk_dbn(intra, inter, ns, 'discrete', dnodes, 'eclass1', eclass1, 'eclass2', eclass2,'names',names);
+bnet = mk_dbn(intra, inter, ns, 'discrete', dnodes,'observed',onodes, 'eclass1', eclass1, 'eclass2', eclass2,'names',names);
 end
 
