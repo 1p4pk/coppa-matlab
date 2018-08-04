@@ -16,17 +16,18 @@ filename = './example/data.csv'; delimiter = ';'; timestamp_format = 'yyyy-MM-dd
 data = import_csv(filename, delimiter); 
 
 %Prepare Data
-[dataTraining dataTesting ns datn] = prepare_data(data,timestamp_format,CaseID,Timestamp,Activity,70); 
+[dataTraining dataTesting unique_values datn] = prepare_data(data,timestamp_format,CaseID,Timestamp,Activity,70); 
  %% 
 %Define model
 N = datn -1 + 1; % number of variables in one time slice. datn + 1 (for hidden state) -1 (for case id column)
-bnet = create_dbn(N,ns);
+
+bnet = create_dbn(N,unique_values,3);
 %% 
 
-%bestbnet =  learning(bnet,N,dataTraining,10);
+bestbnet =  learning(bnet,N,dataTraining,2);
 
 %load('bestbnet_sap_p2p.mat');
-load('bestbnet_data.mat');
+%load('bestbnet_data.mat');
 %load('bestbnet_bpi2013.mat');
 %% Draw Model
 G = bestbnet.dag;

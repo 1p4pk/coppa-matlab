@@ -1,4 +1,4 @@
-function [dataTraining,dataTesting,ns,datn] = prepare_data(data,timestamp_format,CaseID,Timestamp,Activity,x)
+function [dataTraining,dataTesting,unique_values,datn] = prepare_data(data,timestamp_format,CaseID,Timestamp,Activity,x)
 %PREPARE_DATA Summary of this function goes here
 %   Detailed explanation goes here
 %Convert Timestamp
@@ -55,9 +55,6 @@ end
 save('mapping_table.mat','mapping');
 
 ncases = unique_values{1}; % get number of cases from log
-Q = 4; % num hidden states %input from user
-unique_values{1} = Q; %replace cases count by number of states
-ns = cell2mat(unique_values);%number of states
 
 % Split data by case, remove case id and save in cell array
  [~,~,X] = unique(data_num(:,CaseID));

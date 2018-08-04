@@ -1,6 +1,10 @@
-function [bnet] = create_dbn(N,ns)
+function [bnet] = create_dbn(N,unique_values,Q)
 %CREATE_DBN Summary of this function goes here
 %   Detailed explanation goes here
+%Q = 4; % num hidden states %input from user
+unique_values{1} = Q; %replace cases count by number of states
+ns = cell2mat(unique_values);%number of states
+
 % Which nodes will be observed? 
 onodes = [2:N]; %all but not the hidden state
 dnodes = [1:N]; %discrete nodes = all, because we only support discrete attributes at the moment
