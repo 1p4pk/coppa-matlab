@@ -12,7 +12,7 @@ ncases = length(data);
 ss = bnet.nnodes_per_slice; %number of nodes in model
 onodes = 2:ss; % all but the first two (state and activity)
 evidence = create_evidence(bnet, data, onodes); %adjust to remove last event?
-prediction = cell(ncases);
+prediction = zeros(bnet.node_sizes_slice(1),ncases);
 
 
 for j=1:ncases
@@ -21,6 +21,6 @@ for j=1:ncases
     T = length(evidence{j});
     m = marginal_nodes(engine, 1, T);
     %get state with highest probability
-    [M I] = max(m.T);
-    prediction{j} = I;
+    %[M I] = max(m.T);
+    prediction(:,j) = m.T;
 end
