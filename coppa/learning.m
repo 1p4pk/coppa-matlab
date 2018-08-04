@@ -16,7 +16,7 @@ bestloglik = -inf; %initialize
         %% 
         %CPDs. TODO!
 
-        for i=1:2*N
+        for i=1:(N+1)
             bnet.CPD{i} = tabular_CPD(bnet, i);
         end
 
@@ -47,7 +47,7 @@ bestloglik = -inf; %initialize
      %% 
 
         %Junction tree learning engine for parameter learning
-        engine = hmm_inf_engine(bnet);
+        engine = bk_inf_engine(bnet);
 
         %m = marginal_nodes(engine, nodes, t);
 
