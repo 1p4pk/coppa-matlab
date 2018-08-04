@@ -29,7 +29,7 @@ fileID = fopen(filename,'r');
 %   column3: text (%D)
 % For more information, see the TEXTSCAN documentation.
 
-z = textscan(fgetl(fileID),'%s','Delimiter',delimiter)
+z = textscan(fgetl(fileID),'%s','Delimiter',delimiter);
 hdr = size(z{1},1);
 formatSpec = [repmat('%q',1,hdr),'%[^\n\r]'];
 %formatSpec = '%s%s%s%s%s%[^\n\r]';

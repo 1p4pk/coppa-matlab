@@ -4,7 +4,7 @@ function [dataTraining,dataTesting,unique_values,datn] = prepare_data(data,times
 %Convert Timestamp
 data(:,Timestamp) = datetime(data(:,Timestamp),'TimeZone','Europe/London','InputFormat',timestamp_format);
 
-data = sortrows(data,[CaseID,Timestamp]) %Make sure log is sorted by CaseID and Timestamp
+data = sortrows(data,[CaseID,Timestamp]); %Make sure log is sorted by CaseID and Timestamp
 data(:,Timestamp) = []; %Remove Timestamp Column as it is not needed anymore
 %% 
 %Make sure CaseID is first column and Activity second column
@@ -70,13 +70,13 @@ for i=1:ncases
 end
 data_cell(del_ind) = [];
 
-p = x/100      % proportion of rows to select for training
-N = size(data_cell,1)  % total number of rows 
-tf = false(N,1)    % create logical index vector
-tf(1:round(p*N)) = true     
-tf = tf(randperm(N))   % randomise order
-dataTraining = data_cell(tf,:) 
-dataTesting = data_cell(~tf,:) 
+p = x/100  ;    % proportion of rows to select for training
+N = size(data_cell,1);  % total number of rows 
+tf = false(N,1);    % create logical index vector
+tf(1:round(p*N)) = true;     
+tf = tf(randperm(N));   % randomise order
+dataTraining = data_cell(tf,:) ;
+dataTesting = data_cell(~tf,:) ;
 
 end
 
