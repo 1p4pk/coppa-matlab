@@ -64,6 +64,14 @@ ns = cell2mat(unique_values);%number of states
  data_num(:,CaseID) =  string(missing); %remove CaseID and create empty values for hidden state
  data_cell = accumarray(X,1:size(data_num,1),[],@(r){data_num(r,:)});
  
+% Delete cases with only one event as trace length has to be at least 2
+del_ind = [];
+for i=1:ncases
+    if size(data_cell{i},1)==1
+        del_ind = [del_ind;i];
+    end
+end
+data_cell(del_ind) = [];
 
 p = x/100      % proportion of rows to select for training
 N = size(data_cell,1)  % total number of rows 
