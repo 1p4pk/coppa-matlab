@@ -8,11 +8,12 @@ addpath(genpath('./coppa/'));
 %%
 %Load data set
 %Input Required: only discrete attributes (except timestamp)
-filename = './example/data.csv'; delimiter = ';'; timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; CaseID = 1; Activity = 2; Timestamp = 3;
-%filename = './example/bpi2013/VINST cases closed problems_COPPA.csv';delimiter = ';'; timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; CaseID = 1; Activity = 2; Timestamp = 3;
+%filename = './example/data.csv'; delimiter = ';'; timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; CaseID = 1; Activity = 2; Timestamp = 3;
+filename = './example/bpi2013/VINST cases closed problems_COPPA.csv';delimiter = ';'; timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; CaseID = 1; Activity = 2; Timestamp = 3;
 %filename = './example/sap/SAP_P2P_COPPA_FULL.csv'; delimiter = ','; timestamp_format = 'yyyy-MM-dd HH:mm:ss.SSSSSSS'; CaseID = 1; Activity = 2; Timestamp = 3;
 
 %Load Data
+
 data = import_csv(filename, delimiter); 
 
 %Prepare Data
@@ -21,19 +22,20 @@ data = import_csv(filename, delimiter);
 %Define model
 N = datn -1 + 1; % number of variables in one time slice. datn + 1 (for hidden state) -1 (for case id column)
 
-bnet = create_dbn(N,unique_values,3);
+%bnet = create_dbn(N,unique_values,6);
 %% 
 
-bestbnet =  learning(bnet,N,dataTraining,2);
+%bestbnet =  learning(bnet,N,dataTraining,1);
 
 %load('bestbnet_sap_p2p.mat');
 %load('bestbnet_data.mat');
-%load('bestbnet_bpi2013.mat');
+load('bestbnet_bpi2013.mat');
 %% Draw Model
 G = bestbnet.dag;
 %draw_graph(G);
 %% 
 
-pred = prediction(bestbnet, dataTesting);
+[pred rv acc] = prediction(bestbnet, dataTesting);
+
 
 mapped_value = map_to_name(2,2);
