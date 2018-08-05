@@ -1,4 +1,4 @@
-function prediction = prediction(bnet, data, steps)
+function [prediction real_value accuracy] = prediction(bnet, data, steps)
 %Calculate the prediction based on
 %   bnet = supplied dynamic bayesian network
 %   ev = log case at who's end the prediction happens
@@ -9,18 +9,23 @@ function prediction = prediction(bnet, data, steps)
  end
 
 ncases = length(data);
-ss = bnet.nnodes_per_slice; %number of nodes in model
-onodes = 2:ss; % all but the first two (state and activity)
-evidence = create_evidence(bnet, data, onodes); %adjust to remove last event?
-prediction = zeros(bnet.node_sizes_slice(1),ncases);
+evidence = create_evidence(bnet, data); %adjust to remove last event?
+prediction = cell(1,ncases);
+real_value = cell(1,ncases);
+accuracy = zeros(1,ncases);
 
 
 for j=1:ncases
-    engine = bk_ff_hmm_inf_engine(bnet);
-    engine = enter_evidence(engine, evidence{j});
-    T = length(evidence{j});
-    m = marginal_nodes(engine, 1, T);
-    %get state with highest probability
-    %[M I] = max(m.T);
-    prediction(:,j) = m.T;
+    engine = bk_inf_engine(bnet);
+    [ss T] = size(evidence{j});
+    engine = enter_evidence(engine, evidence{j}(:,1:T-1));
+    m = marginal_nodes(engine, 1, T-1+steps);
+    [M I] = max(m.T);
+    prediction{j} = I;
+    real_value{j} = evidence{j}{2,T};
+    if prediction{j} == real_value{j}
+        accuracy(j) = 1; % akutell quatsch da der state predicted wird und nicht die observation
+    end
+end
+disp(['Prediction Accuracy: ' num2str(100*mean(accuracy)) '%']);
 end
