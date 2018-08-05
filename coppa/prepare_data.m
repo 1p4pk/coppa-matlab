@@ -64,7 +64,7 @@ ncases = unique_values{1}; % get number of cases from log
 % Delete cases with only one event as trace length has to be at least 2
 del_ind = [];
 for i=1:ncases
-    if size(data_cell{i},1)==1
+    if size(data_cell{i},1)<3
         del_ind = [del_ind;i];
     end
 end
