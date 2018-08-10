@@ -18,14 +18,26 @@ accuracy = zeros(1,ncases);
 for j=1:ncases
     engine = bk_inf_engine(bnet);
     [ss T] = size(evidence{j});
+    temp = engine;
     engine = enter_evidence(engine, evidence{j}(:,1:T-1));
     m = marginal_nodes(engine, 1, T-1+steps);
+    [M I] = max(m.T);
+    engine = temp;
+    new_evidence = evidence{j};
+    for z=1:ss
+        new_evidence{z,T} = [];
+    end
+    new_evidence{1,T} = I; 
+    engine = enter_evidence(engine, new_evidence);
+    m = marginal_nodes(engine, 2, T-1+steps);
+    m.T
     [M I] = max(m.T);
     prediction{j} = I;
     real_value{j} = evidence{j}{2,T};
     if prediction{j} == real_value{j}
-        accuracy(j) = 1; % akutell quatsch da der state predicted wird und nicht die observation
+        accuracy(j) = 1;
     end
+    
 end
 disp(['Prediction Accuracy: ' num2str(100*mean(accuracy)) '%']);
 end
