@@ -18,11 +18,20 @@ learn_new_model = 'yes'; %Options: 'yes','no'
 %Load data set
 %Input Required: only discrete attributes (except timestamp)
 if strcmp(dataset,'sap')
-    filename = './example/sap/SAP_P2P_COPPA_FULL.csv'; delimiter = ';'; timestamp_format = 'yyyy-MM-dd HH:mm:ss.SSSSSSS'; CaseID = 1; Activity = 2; Timestamp = 3;    
+    filename = './example/sap/SAP_P2P_COPPA_FULL.csv'; 
+    delimiter = ';'; 
+    timestamp_format = 'yyyy-MM-dd HH:mm:ss.SSSSSSS'; 
+    CaseID = 1; Activity = 2; Timestamp = 3;    
 elseif strcmp(dataset,'bpi2013')
-    filename = './example/bpi2013/VINST cases closed problems.csv';delimiter = ';'; timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; CaseID = 1; Activity = 3; Timestamp = 2;
+    filename = './example/bpi2013/VINST cases closed problems.csv';
+    delimiter = ';'; 
+    timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; 
+    CaseID = 1; Activity = 3; Timestamp = 2;
 else
-    filename = './example/data.csv'; delimiter = ';'; timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; CaseID = 1; Activity = 2; Timestamp = 3;
+    filename = './example/data.csv'; 
+    delimiter = ';'; 
+    timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; 
+    CaseID = 1; Activity = 2; Timestamp = 3;
 end
 
 %Load and Prepare Data
@@ -32,11 +41,11 @@ end
 if strcmp(learn_new_model,'yes')
     [bestoverallbnet bestoverallstate] = stategrid_learning(model, N ,dataTraining,num_iter,min_state, max_state, unique_values);
     disp(['Best number of states was ' num2str(bestoverallstate) '.']);
-    save_name = ['bestbnet_' dataset '.mat'];
+    save_name = ['bestbnet_' model '_' dataset '.mat'];
     save(save_name,'bestoverallbnet');
 else
     disp('Loading saved model');
-    load_name = ['bestbnet_' dataset '.mat'];
+    load_name = ['bestbnet_' model '_' dataset '.mat'];
 end
 
 %% Draw Model
