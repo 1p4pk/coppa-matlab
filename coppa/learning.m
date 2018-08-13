@@ -1,4 +1,4 @@
-function [bestbnet] = learning(bnet,N,data_cell,iters)
+function [bestbnet bestloglik] = learning(bnet,N,data_cell,iters)
 %LEARNING Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -67,5 +67,4 @@ bestloglik = -inf; %initialize
             bestbnet = bnet2;
         end
     end
-    save('bestbnet_allHVs.mat','bestbnet')
 end

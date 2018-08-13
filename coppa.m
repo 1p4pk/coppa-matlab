@@ -5,37 +5,44 @@ addpath(genpath('./libs/'));
 addpath(genpath('./examples/'));
 addpath(genpath('./coppa/'));
 
-%%
+%% User Input
+% State range
+min_state = 6;
+max_state = 20;
+splitPercentage = 70; % Split Training Set
+model = 'hmm'; %Options: 'hmm','pfa','dbn'
+num_iter = 2; %number of times the model will be initialized with different random values to avoid local optimum
+dataset = 'test'; %Options: 'sap','bpi2013','test'
+learn_new_model = 'yes'; %Options: 'yes','no'
+
 %Load data set
 %Input Required: only discrete attributes (except timestamp)
-%filename = './example/data.csv'; delimiter = ';'; timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; CaseID = 1; Activity = 2; Timestamp = 3;
-filename = './example/bpi2013/VINST cases closed problems_COPPA.csv';delimiter = ';'; timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; CaseID = 1; Activity = 2; Timestamp = 3;
-%filename = './example/sap/SAP_P2P_COPPA_FULL.csv'; delimiter = ','; timestamp_format = 'yyyy-MM-dd HH:mm:ss.SSSSSSS'; CaseID = 1; Activity = 2; Timestamp = 3;
+if strcmp(dataset,'sap')
+    filename = './example/sap/SAP_P2P_COPPA_FULL.csv'; delimiter = ';'; timestamp_format = 'yyyy-MM-dd HH:mm:ss.SSSSSSS'; CaseID = 1; Activity = 2; Timestamp = 3;    
+elseif strcmp(dataset,'bpi2013')
+    filename = './example/bpi2013/VINST cases closed problems.csv';delimiter = ';'; timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; CaseID = 1; Activity = 3; Timestamp = 2;
+else
+    filename = './example/data.csv'; delimiter = ';'; timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; CaseID = 1; Activity = 2; Timestamp = 3;
+end
 
-%Load Data
-
-data = import_csv(filename, delimiter); 
-
-%Prepare Data
-[dataTraining dataTesting unique_values datn] = prepare_data(data,timestamp_format,CaseID,Timestamp,Activity,70); 
+%Load and Prepare Data
+[dataTraining dataTesting unique_values N] = prepare_data(filename, delimiter, timestamp_format,CaseID,Timestamp,Activity,splitPercentage, model); 
  %% 
-%Define model
-N = datn -1 + 1; % number of variables in one time slice. datn + 1 (for hidden state) -1 (for case id column)
+%Define model and start learning
+if strcmp(learn_new_model,'yes')
+    [bestoverallbnet bestoverallstate] = stategrid_learning(model, N ,dataTraining,num_iter,min_state, max_state, unique_values);
+    disp(['Best number of states was ' num2str(bestoverallstate) '.']);
+    save_name = ['bestbnet_' dataset '.mat'];
+    save(save_name,'bestoverallbnet');
+else
+    disp('Loading saved model');
+    load_name = ['bestbnet_' dataset '.mat'];
+end
 
-%bnet = create_dbn(N,unique_values,6);
-%% 
-
-%bestbnet =  learning(bnet,N,dataTraining,1);
-
-%load('bestbnet_sap_p2p.mat');
-%load('bestbnet_data.mat');
-load('bestbnet_bpi2013.mat');
 %% Draw Model
-G = bestbnet.dag;
+%G = bestbnet.dag;
 %draw_graph(G);
 %% 
 
-[pred rv acc] = prediction(bestbnet, dataTesting);
-
-
-mapped_value = map_to_name(2,2);
+%Prediction
+[pred rv acc] = prediction(bestoverallbnet, dataTesting);

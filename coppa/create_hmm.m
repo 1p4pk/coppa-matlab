@@ -4,7 +4,7 @@ function [bnet] = create_hmm(unique_values,Q)
 N = 2;
 %Q = 4; % num hidden states %input from user
 unique_values{1} = Q; %replace cases count by number of states
-ns = unique_values{1:2};%number of states
+ns = cell2num(unique_values(1:2));%number of states
 
 % Which nodes will be observed? 
 onodes = [2]; %all but not the hidden state

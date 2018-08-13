@@ -1,6 +1,12 @@
-function [dataTraining,dataTesting,unique_values,datn] = prepare_data(data,timestamp_format,CaseID,Timestamp,Activity,x)
+function [dataTraining,dataTesting,unique_values,N] = prepare_data(filename, delimiter,timestamp_format,CaseID,Timestamp,Activity,x, model)
 %PREPARE_DATA Summary of this function goes here
 %   Detailed explanation goes here
+
+disp('Start Loading Data');
+
+%Load Data
+data = import_csv(filename, delimiter); 
+
 %Convert Timestamp
 data(:,Timestamp) = datetime(data(:,Timestamp),'TimeZone','Europe/London','InputFormat',timestamp_format);
 
@@ -26,10 +32,15 @@ end
 data(:,del_index) = [];
 
 %Allow max q columns, delete rest
-q = 4;
+q = 8;
 [datlen datn] = size(data);
 if datn>q
     data(:,[q+1:datn]) = [];
+end
+
+%if hmm or pfa delete all columns but observation
+if strcmp(model,'hmm') || strcmp(model,'pfa')
+    data = data(:,1:2);
 end
 
 %Get info from data
@@ -77,6 +88,11 @@ tf(1:round(p*N)) = true;
 tf = tf(randperm(N));   % randomise order
 dataTraining = data_cell(tf,:) ;
 dataTesting = data_cell(~tf,:) ;
+
+N = datn -1 + 1; % number of variables in one time slice. datn + 1 (for hidden state) -1 (for case id column)
+
+disp('Finish Loading Data');
+disp('');
 
 end
 

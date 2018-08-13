@@ -8,8 +8,10 @@ function [prediction real_value accuracy] = prediction(bnet, data, steps)
       steps = 1;
  end
 
+disp('Start Prediction');
+ 
 ncases = length(data);
-evidence = create_evidence(bnet, data); %adjust to remove last event?
+evidence = create_evidence(bnet, data); 
 prediction = cell(1,ncases);
 real_value = cell(1,ncases);
 accuracy = zeros(1,ncases);
@@ -43,5 +45,6 @@ for j=1:ncases
     end
     
 end
+disp('Prediction Finished');
 disp(['Prediction Accuracy: ' num2str(100*mean(accuracy)) '%']);
 end
