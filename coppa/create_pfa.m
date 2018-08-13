@@ -4,7 +4,12 @@ function [bnet] = create_pfa(unique_values,Q)
 N = 2;
 %Q = 4; % num hidden states %input from user
 unique_values{1} = Q; %replace cases count by number of states
-ns = cell2mat(unique_values{1:2});%number of states
+% hab es hier partu nicht hinbekommen daraus einen vektor mit nur den
+% ersten beiden Werten zu machen... Deine Implementierun {1:2} mochte er
+% nämlich nicht
+punique_values{1} = unique_values{1};
+punique_values{2} = unique_values{2};
+ns = cell2mat(punique_values);%number of states
 
 % Which nodes will be observed? 
 onodes = [2]; %all but not the hidden state

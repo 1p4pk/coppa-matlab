@@ -20,18 +20,22 @@ for j=1:ncases
     [ss T] = size(evidence{j});
     temp = engine;
     engine = enter_evidence(engine, evidence{j}(:,1:T-1));
-    m = marginal_nodes(engine, 1, T-1+steps);
-    [M I] = max(m.T);
-    engine = temp;
-    new_evidence = evidence{j};
-    for z=1:ss
-        new_evidence{z,T} = [];
+    mS = marginal_nodes(engine, 1, T-1+steps);
+    cumulatedPred = zeros(bnet.node_sizes_slice(2),1);
+    for c=1:bnet.node_sizes_slice(1)
+        engine = temp;
+        new_evidence = evidence{j};
+        for z=1:ss
+            new_evidence{z,T} = [];
+        end
+        new_evidence{1,T} = c; 
+        engine = enter_evidence(engine, new_evidence);
+        mA = marginal_nodes(engine, 2, T-1+steps);
+        weightedPred = (mA.T *mS.T(c));
+        cumulatedPred = cumulatedPred + weightedPred;
     end
-    new_evidence{1,T} = I; 
-    engine = enter_evidence(engine, new_evidence);
-    m = marginal_nodes(engine, 2, T-1+steps);
-    m.T
-    [M I] = max(m.T);
+    % cumulatedPred auf = 1 normalisieren?
+    [M I] = max(cumulatedPred);
     prediction{j} = I;
     real_value{j} = evidence{j}{2,T};
     if prediction{j} == real_value{j}
