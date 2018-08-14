@@ -20,12 +20,13 @@ ind = ind(find(ind~=CaseID));
 ind = ind(find(ind~=Activity));
 data = data(:,[CaseID, Activity, ind]); 
 
-% Delete columns with more than 30 different values
+% Delete columns with more than 100 different values or only 1 different
+% value
 [datlen datn] = size(data);
 del_index = [];
 for i=3:datn
     k = length(unique(data(:,i)));
-    if k>30
+    if k>100 || k==1
         del_index = [del_index; i];
     end
 end
