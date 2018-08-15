@@ -1,5 +1,4 @@
-%% 
-%Import required files/functions/libraries
+%% Import required files/functions/libraries
 addpath(genpath('./data_in/'));
 addpath(genpath('./libs/'));
 addpath(genpath('./examples/'));
@@ -9,17 +8,24 @@ addpath(genpath('./coppa/'));
 % State range
 min_state = 14;
 max_state = 14;
+grid_steps = 4;
+
 splitPercentage = 70; % Split Training Set
 model = 'dbn'; %Options: 'hmm','pfa','dbn'
-num_iter = 2; %number of times the model will be initialized with different random values to avoid local optimum
-dataset = 'sap'; %Options: 'sap','bpi2013','test'
+num_iter = [10 3]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
+dataset = 'bpi2013'; %Options: 'sap','sap-small','bpi2013','test'
 learn_new_model = 'no'; %Options: 'yes','no'
 prediction_mode = 'simple'; %Options: 'simple','distribution'
 
-%Load data set
+%% Load data set
 %Input Required: only discrete attributes (except timestamp)
 if strcmp(dataset,'sap')
     filename = './example/sap/SAP_P2P_COPPA_FULL.csv'; 
+    delimiter = ';'; 
+    timestamp_format = 'yyyy-MM-dd HH:mm:ss.SSSSSSS'; 
+    CaseID = 1; Activity = 2; Timestamp = 3;    
+elseif strcmp(dataset,'sap-small')
+    filename = './example/sap/SAP_P2P_COPPA_SMALL.csv'; 
     delimiter = ';'; 
     timestamp_format = 'yyyy-MM-dd HH:mm:ss.SSSSSSS'; 
     CaseID = 1; Activity = 2; Timestamp = 3;    
@@ -28,6 +34,11 @@ elseif strcmp(dataset,'bpi2013')
     delimiter = ';'; 
     timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; 
     CaseID = 1; Activity = 3; Timestamp = 2;
+elseif strcmp(dataset,'test-sametrace')
+    filename = './example/data_sametrace.csv';
+    delimiter = ';'; 
+    timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; 
+    CaseID = 1; Activity = 2; Timestamp = 3;
 else
     filename = './example/data.csv'; 
     delimiter = ';'; 
@@ -37,10 +48,9 @@ end
 
 %Load and Prepare Data
 [dataTraining dataTesting unique_values N] = prepare_data(filename, delimiter, timestamp_format,CaseID,Timestamp,Activity,splitPercentage, model); 
- %% 
-%Define model and start learning4its
+%% Define model and start learning
 if strcmp(learn_new_model,'yes')
-    [bestoverallbnet bestoverallstate] = stategrid_learning(model, N ,dataTraining,num_iter,min_state, max_state, unique_values);
+    [bestoverallbnet bestoverallstate] = stategrid_learning(model, N ,dataTraining,num_iter,min_state, max_state, grid_steps,unique_values);
     disp(['Best number of states was ' num2str(bestoverallstate) '.']);
     save_name = ['bestbnet_' model '_' dataset '.mat'];
     save(save_name,'bestoverallbnet');
@@ -50,13 +60,14 @@ else
 end
 
 %% Draw Model
-%G = bestbnet.dag;
+%G = bestoverallbnet.dag;
 %draw_graph(G);
-%% 
 
-%Prediction
+%% Prediction
 if strcmp(prediction_mode,'simple')
-    [pred rv acc] = prediction_simple(bestoverallbnet, dataTesting);
+  %  [pred rv acc] = prediction_simple(bestoverallbnet, dataTesting);
 else
     [pred rv acc] = prediction(bestoverallbnet, dataTesting);
 end
+
+prediction_ngram(dataTraining,dataTesting,unique_values);
