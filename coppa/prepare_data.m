@@ -33,7 +33,7 @@ end
 data(:,del_index) = [];
 
 %Allow max q columns, delete rest
-q = 8;
+q = 3;
 [datlen datn] = size(data);
 if datn>q
     data(:,[q+1:datn]) = [];

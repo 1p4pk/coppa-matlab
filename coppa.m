@@ -6,8 +6,8 @@ addpath(genpath('./coppa/'));
 
 %% User Input
 % State range
-min_state = 14;
-max_state = 14;
+min_state = 5;
+max_state = 5;
 grid_steps = 4;
 
 splitPercentage = 70; % Split Training Set
@@ -15,7 +15,7 @@ model = 'dbn'; %Options: 'hmm','pfa','dbn'
 num_iter = [10 3]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
 dataset = 'bpi2013'; %Options: 'sap','sap-small','bpi2013','test'
 learn_new_model = 'no'; %Options: 'yes','no'
-prediction_mode = 'simple'; %Options: 'simple','distribution'
+prediction_mode = 'distribution'; %Options: 'simple','distribution'
 
 %% Load data set
 %Input Required: only discrete attributes (except timestamp)
@@ -57,6 +57,7 @@ if strcmp(learn_new_model,'yes')
 else
     disp('Loading saved model');
     load_name = ['bestbnet_' model '_' dataset '.mat'];
+    load(load_name, 'bestoverallbnet');
 end
 
 %% Draw Model
