@@ -28,20 +28,37 @@ for j=1:ncases
     tempEngine = engine;
     [ss T] = size(evidence{j});
     
-    %todo include steps in usage of k in the formlas
-    for k=3:T-1
+    %todo include steps in usage of k in the formulas
+    for k=2:T-steps
         noPred = noPred + 1;
         engine = tempEngine;
-        engine = enter_evidence(engine, evidence{j}(:,1:k-1));
-        mS = marginal_nodes(engine, 1, k-1+steps);
+        %In order to perform filtering, we add an empty evidence to the
+        %actual evidence until t, such that we can do inference on the
+        %hidden node in time slice t+steps
+        evidenceToEnter = evidence{j}(:,1:(k+steps-1));
+        %@Matthias: how to set element in cell to [] ?
+        if steps > 1
+            evidenceToEnter(:,k:(k+steps-1)) = evidenceToEnter(1,k);
+        else
+            evidenceToEnter(:,k) = evidenceToEnter(1,k);
+        end
+        %enter evidence and choose filtering (smoothing is default)
+        engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
+        %calculate marginals on the hidden node in t+steps
+        mS = marginal_nodes(engine, 1, k+steps-1);
+        
+        %create static bayesian network to do inference on observed node
+        %activity
         bnet = mk_bnet(dbnet.intra, dbnet.node_sizes_slice, 'discrete', dbnet.dnodes_slice, 'observed', dbnet.observed);
         for n=1:dbnet.nnodes_per_slice
             bnet.CPD{n} = dbnet.CPD{n};
         end
-
         bnetEngine = jtree_inf_engine(bnet);
         tempBnet = bnetEngine;
         bnetEvidence = cell(1,dbnet.nnodes_per_slice);
+        
+        %do inference on activity for each possible hidden node and weight results
+        %according to probability of that hidden node
         cumulatedPred = zeros(dbnet.node_sizes_slice(2),1);
         for c=1:dbnet.node_sizes_slice(1)
             bnetEngine = tempBnet;
