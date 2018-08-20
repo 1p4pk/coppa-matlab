@@ -7,13 +7,13 @@ addpath(genpath('./coppa/'));
 %% User Input
 % State range
 min_state = 10;
-max_state = 20;
+max_state = 10;
 grid_steps = 4;
 
 splitPercentage = 70; % Split Training Set
 model = 'pfa'; %Options: 'hmm','pfa','dbn'
 num_iter = [1 1]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
-dataset = 'bpi2013'; %Options: 'sap','sap-small','bpi2013','test'
+dataset = 'bpi2012a'; %Options: 'sap','sap-small','bpi2013','test'
 learn_new_model = 'yes'; %Options: 'yes','no'
 prediction_mode = 'distribution'; %Options: 'simple','distribution'
 
@@ -34,11 +34,17 @@ elseif strcmp(dataset,'bpi2013')
     delimiter = ';'; 
     timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; 
     CaseID = 1; Activity = 3; Timestamp = 2;
+elseif strcmp(dataset,'bpi2012a')
+    filename = './example/bpi2012/financial_log_application_process_ressourceContext.csv';
+    delimiter = ';'; 
+    timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; 
+    CaseID = 1; Activity = 2; Timestamp = 3;
 elseif strcmp(dataset,'test-sametrace')
     filename = './example/data_sametrace.csv';
     delimiter = ';'; 
     timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; 
     CaseID = 1; Activity = 2; Timestamp = 3;
+    
 else
     filename = './example/data.csv'; 
     delimiter = ';'; 
