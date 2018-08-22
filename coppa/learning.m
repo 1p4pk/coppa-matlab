@@ -58,7 +58,7 @@ bestloglik = -inf; %initialize
         disp('Building data structure');
         cases = create_evidence(bnet, data_cell);
         disp('Start Learning');
-        [bnet2, LLtrace] = learn_params_dbn_em(engine, cases, 'max_iter', 500);
+        [bnet2, LLtrace] = learn_params_dbn_em(engine, cases, 'max_iter', 50);
     	loglik = LLtrace(length(LLtrace));
     %when we find a better model than the previous, write its results into
     %file
