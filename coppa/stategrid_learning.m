@@ -1,10 +1,10 @@
-function [bestoverallbnet,bestoverallstate] = stategrid_learning(model, N,dataTraining,num_iter, min_state,max_state,unique_values)
+function [bestoverallbnet,bestoverallstate] = stategrid_learning(model, N,dataTraining,num_iter, min_state,max_state,grid_steps,unique_values)
 %STATEGRID_LEARNING Summary of this function goes here
 %   Detailed explanation goes here
 
 bestoverallloglik = -inf; %initialize
-for q=min_state:2:max_state
-    disp(['Start Learning ' model ' model. State size: ' num2str(q) ', repeat ' num2str(num_iter) ' times']);
+for q=min_state:grid_steps:max_state
+    disp(['Start Learning ' model ' model. State size: ' num2str(q) ', repeat ' num2str(num_iter(2)) ' times']);
     if model=='dbn'
     bnet = create_dbn(N,unique_values,q);
     [bestbnet bestloglik] = learning(bnet,N,dataTraining,num_iter);
