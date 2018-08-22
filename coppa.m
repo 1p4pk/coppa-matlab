@@ -11,7 +11,7 @@ max_state = 10;
 grid_steps = 4;
 
 splitPercentage = 70; % Split Training Set
-model = 'pfa'; %Options: 'hmm','pfa','dbn'
+model = 'dbn'; %Options: 'hmm','pfa','dbn'
 num_iter = [1 1]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
 dataset = 'bpi2012a'; %Options: 'sap','sap-small','bpi2013','test'
 learn_new_model = 'yes'; %Options: 'yes','no'
@@ -58,7 +58,7 @@ end
 %@Matthias, hier wurde grid_seps im learning übergeben, aber dort nicht
 %verwendet? Ich habe es mal aus dem Funktionsaufruf entfernt
 if strcmp(learn_new_model,'yes')
-    [bestoverallbnet bestoverallstate] = stategrid_learning(model, N ,dataTraining,num_iter,min_state, max_state, unique_values);
+    [bestoverallbnet bestoverallstate] = stategrid_learning(model, N ,dataTraining,num_iter,min_state, max_state,grid_steps, unique_values);
     disp(['Best number of states was ' num2str(bestoverallstate) '.']);
     save_name = ['bestbnet_' model '_' dataset '.mat'];
     save(save_name,'bestoverallbnet');
