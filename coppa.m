@@ -79,7 +79,10 @@ end
 if strcmp(prediction_mode,'simple')
     [pred rv acc] = prediction_simple(bestoverallbnet, dataTesting);
 else
-    [pred rv acc] = prediction(bestoverallbnet, dataTesting);
+    [pred rv] = prediction(bestoverallbnet, dataTesting);
 end
 
+[acc sens spec] = score_model(pred, rv, model);
+
 prediction_ngram(dataTraining,dataTesting,unique_values);
+[acc_n sens_n spec_n] = score_model(pred, rv, 'n-gram');

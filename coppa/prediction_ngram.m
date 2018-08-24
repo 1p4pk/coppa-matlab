@@ -1,4 +1,4 @@
-function [] = prediction_ngram(dataTraining,dataTesting,unique_values)
+function [pred real_value] = prediction_ngram(dataTraining,dataTesting,unique_values)
 %NGRAM_ACCURACY Summary of this function goes here
 %   Detailed explanation goes here
 %% N-Gram Benchmark
@@ -6,6 +6,8 @@ ncases = size(dataTraining,1);
 traces = cell(1,ncases);
 nevents = 0;
 td = containers.Map;
+
+
 for i=1:ncases
     T = size(dataTraining{i},2);
     nevents = nevents + T;
@@ -28,6 +30,7 @@ end
 
 ncases = size(dataTesting,1);
 pred = zeros(1,ncases);
+real_value = cell(1,ncases);
 for i=1:ncases
     T = size(dataTesting{i},1);
     keyfound = true;
@@ -44,11 +47,9 @@ for i=1:ncases
             end
         end
     [M I] = max(mf);
-    if I == dataTesting{i}(T,2)
-        pred(i) = 1;
-    end
+    pred(i) = I;
+    real_value{i} = dataTesting{i}(T,2);
     end
 end
-disp(['N-Gram Accuracy: ' num2str(mean(pred*100.0)) '%']);
 end
 

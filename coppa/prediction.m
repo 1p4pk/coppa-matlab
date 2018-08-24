@@ -1,4 +1,4 @@
-function [prediction real_value accuracy] = prediction(dbnet, data, steps)
+function [prediction real_value] = prediction(dbnet, data, steps)
 %Calculate the prediction based on
 %   dbnet = supplied dynamic bayesian network
 %   ev = log case at who's end the prediction happens
@@ -20,7 +20,6 @@ end
 evidence = create_evidence(dbnet, data); 
 prediction = cell(1,predEventSum);
 real_value = cell(1,predEventSum);
-accuracy = zeros(1,predEventSum);
 
 noPred = 0;
 for j=1:ncases
@@ -73,11 +72,8 @@ for j=1:ncases
         [M I] = max(cumulatedPred);
         prediction{noPred} = I;
         real_value{noPred} = evidence{j}{2,k};
-        if prediction{noPred} == real_value{noPred}
-            accuracy(noPred) = 1;
-        end
+        
     end
 end
 disp('Prediction Finished');
-disp(['Prediction Accuracy: ' num2str(100*mean(accuracy)) '%']);
 end
