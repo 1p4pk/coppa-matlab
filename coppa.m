@@ -6,16 +6,18 @@ addpath(genpath('./coppa/'));
 
 %% User Input
 % State range
-min_state = 10;
-max_state = 10;
-grid_steps = 4;
+min_state = 10; %Minimum number of states
+max_state = 10; %Maximum number of states
+grid_steps = 4; %Size of increment between states
 
 splitPercentage = 70; % Split Training Set
-model = 'dbn'; %Options: 'hmm','pfa','dbn'
+splitStable = 'yes'; %Options: 'yes','no'. Determines if data and test set is always identical or random
+model = 'pfa'; %Options: 'hmm','pfa','dbn'
 num_iter = [1 1]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
-dataset = 'bpi2012a'; %Options: 'sap','sap-small','bpi2013','test'
+dataset = 'test'; %Options: 'sap','sap-small','bpi2013','test'
 learn_new_model = 'yes'; %Options: 'yes','no'
-prediction_mode = 'distribution'; %Options: 'simple','distribution'
+prediction_mode = 'distribution'; %Options: 'simple','distribution'. 'simple' not working at the moment
+draw_model = 'no'; %Options: 'yes', 'no'. Shows model of bayesian network
 
 %% Load data set
 %Input Required: only discrete attributes (except timestamp)
@@ -53,28 +55,29 @@ else
 end
 
 %Load and Prepare Data
-[dataTraining dataTesting unique_values N] = prepare_data(filename, delimiter, timestamp_format,CaseID,Timestamp,Activity,splitPercentage, model); 
+[dataTraining dataTesting unique_values N mapping] = prepare_data(filename, delimiter, timestamp_format,CaseID,Timestamp,Activity,splitPercentage, splitStable, model); 
 %% Define model and start learning
-%@Matthias, hier wurde grid_seps im learning übergeben, aber dort nicht
-%verwendet? Ich habe es mal aus dem Funktionsaufruf entfernt
 if strcmp(learn_new_model,'yes')
+    % Learn new model
     [bestoverallbnet bestoverallstate] = stategrid_learning(model, N ,dataTraining,num_iter,min_state, max_state,grid_steps, unique_values);
-    disp(['Best number of states was ' num2str(bestoverallstate) '.']);
+    %save the best model on disk
     save_name = ['bestbnet_' model '_' dataset '.mat'];
     save(save_name,'bestoverallbnet');
 else
+    % Load existing model from disk
     disp('Loading saved model');
     load_name = ['bestbnet_' model '_' dataset '.mat'];
     load(load_name, 'bestoverallbnet');
 end
 
 %% Draw Model
-%G = bestoverallbnet.dag;
-%draw_graph(G);
-
+if strcmp(draw_model,'yes')
+    G = bestoverallbnet.dag;
+    draw_graph(G);
+end
 %% Prediction
 if strcmp(prediction_mode,'simple')
-  %  [pred rv acc] = prediction_simple(bestoverallbnet, dataTesting);
+    [pred rv acc] = prediction_simple(bestoverallbnet, dataTesting);
 else
     [pred rv acc] = prediction(bestoverallbnet, dataTesting);
 end
