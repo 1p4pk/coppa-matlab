@@ -1,6 +1,24 @@
-function [dataTraining,dataTesting,unique_values,N] = prepare_data(filename, delimiter,timestamp_format,CaseID,Timestamp,Activity,x, model)
-%PREPARE_DATA Summary of this function goes here
-%   Detailed explanation goes here
+function [dataTraining,dataTesting,unique_values,N, mapping] = prepare_data(filename, delimiter,timestamp_format,CaseID,Timestamp,Activity,x,split_stable, model)
+%PREPARE_DATA 
+% Load csv file, transform as necessary and return training and test data
+% set
+%  Input
+%%      filename = path including filename of csv file ("./examples/data.csv")
+%%      delimiter (e.g. "," or ";")
+%%      timestamp_format = format of timestamp (e.g. "d.M.YYYY")
+%%      CaseID = position of CaseID column (e.g. 1)
+%%      Timestamp = position of Timestamp Column (e.g. 2)
+%%      Activity = position of Activity column (e.g. 3)
+%%      x = percentage of training set split size (e.g. "70")
+%%      split_stable = produce same data and test set everytime or shuffle ("yes" or "no")
+%%      model = model type (e.g. "hmm" or "dbn")
+%%
+%   Output
+%%      dataTraining = data set for training
+%%      dataTesting = data set for testing
+%%      unique_values = vector with number of unique values for each attribute (e.g. [100 4 6])
+%%      N = number of attributes in data set
+%%      mapping = mapping table
 
 disp('Start Loading Data');
 
@@ -24,20 +42,20 @@ data = data(:,[CaseID, Activity, ind]);
 % value
 [datlen datn] = size(data);
 del_index = [];
-for i=3:datn
+for i=3:datn % start at because ignoring case id and activity
     k = length(unique(data(:,i)));
-    if k>100 || k==1
+    if k>100 || k==1 % k 0 number of different values
         del_index = [del_index; i];
     end
 end
 data(:,del_index) = [];
 
 %Allow max q columns, delete rest
-q = 3;
-[datlen datn] = size(data);
-if datn>q
-    data(:,[q+1:datn]) = [];
-end
+%q = 3;
+%[datlen datn] = size(data);
+%if datn>q
+%    data(:,[q+1:datn]) = [];
+%end
 
 %if hmm or pfa delete all columns but observation
 if strcmp(model,'hmm') || strcmp(model,'pfa')
@@ -51,20 +69,19 @@ end
 unique_attr = cell(1,datn);
 unique_values = cell(1,datn);
 for i=1:datn
-    unique_attr{i} = sort(unique(data(:,i)));
-    unique_values{i} = length(unique(data(:,i)));
+    unique_attr{i} = sort(unique(data(:,i))); %save unique values for each attribute for mapping
+    unique_values{i} = length(unique(data(:,i))); %save number of different values for each attribute
 end
 
 % Convert log to numbers (faster and necessary for algorithm)
+% Create mapping table to be able to map numbers to real values again
 data_num = ones(datlen,datn);
 mapping = cell(1,datn);
 for i=1:datn
     mapping{i} = cell(1,unique_values{i});
     mapping{i} = cellstr(unique_attr{i});
-    %mapping{i}(1,:) = num2cell(1:unique_values{i});
     data_num(:,i) = double(categorical(data(:,i)));
-end
-save('mapping_table.mat','mapping');
+end  
 
 ncases = unique_values{1}; % get number of cases from log
 
@@ -73,7 +90,7 @@ ncases = unique_values{1}; % get number of cases from log
  data_num(:,CaseID) =  string(missing); %remove CaseID and create empty values for hidden state
  data_cell = accumarray(X,1:size(data_num,1),[],@(r){data_num(r,:)});
  
-% Delete cases with only one event as trace length has to be at least 2
+% Delete cases with only one or two events as trace length has to be at least 3
 del_ind = [];
 for i=1:ncases
     if size(data_cell{i},1)<3
@@ -82,10 +99,14 @@ for i=1:ncases
 end
 data_cell(del_ind) = [];
 
+%Split in test and training data
 p = x/100  ;    % proportion of rows to select for training
 N = size(data_cell,1);  % total number of rows 
 tf = false(N,1);    % create logical index vector
-tf(1:round(p*N)) = true;     
+tf(1:round(p*N)) = true;    
+if strcmp(split_stable,'yes')
+    rng(0);
+end
 tf = tf(randperm(N));   % randomise order
 dataTraining = data_cell(tf,:) ;
 dataTesting = data_cell(~tf,:) ;
