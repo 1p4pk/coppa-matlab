@@ -29,7 +29,7 @@ for i=1:ncases
 end
 
 ncases = size(dataTesting,1);
-pred = zeros(1,ncases);
+pred = cell(1,ncases);
 real_value = cell(1,ncases);
 for i=1:ncases
     T = size(dataTesting{i},1);
@@ -47,7 +47,7 @@ for i=1:ncases
             end
         end
     [M I] = max(mf);
-    pred(i) = I;
+    pred{i} = I;
     real_value{i} = dataTesting{i}(T,2);
     end
 end
