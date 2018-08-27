@@ -1,4 +1,4 @@
-function [dataTraining,dataTesting,unique_values,N, mapping] = prepare_data(filename, delimiter,timestamp_format,CaseID,Timestamp,Activity,x,split_stable, model)
+function [dataTraining,dataTesting,unique_values,N, mapping] = prepare_data(filename, delimiter,timestamp_format,CaseID,Timestamp,Activity,x,split_stable, model, blow_up)
 %PREPARE_DATA 
 % Load csv file, transform as necessary and return training and test data
 % set
@@ -12,6 +12,7 @@ function [dataTraining,dataTesting,unique_values,N, mapping] = prepare_data(file
 %%      x = percentage of training set split size (e.g. "70")
 %%      split_stable = produce same data and test set everytime or shuffle ("yes" or "no")
 %%      model = model type (e.g. "hmm" or "dbn")
+%%      blow_up = if to add additional cases to the data set for each partial trace of the log
 %%
 %   Output
 %%      dataTraining = data set for training
@@ -98,6 +99,28 @@ for i=1:ncases
     end
 end
 data_cell(del_ind) = [];
+
+%Blow up data set by inserting each partial sequence of a case as a new
+%case
+ncases = size(data_cell,1);
+if strcmp(blow_up,'yes')
+    nparticalcases = 0;
+    for i=1:ncases
+        T = size(data_cell{i},1);
+        nparticalcases = nparticalcases + T - 2; %-2 because minimum trace length is 3
+    end
+    data_blown_up = cell(nparticalcases,1);
+    ind = 0;
+    for i=1:ncases
+        T = size(data_cell{i},1);
+        for j=3:T
+            ind = ind + 1;
+            data_blown_up{ind} = data_cell{i}(1:j,:);
+        end
+    end
+data_cell = data_blown_up;    
+unique_values{1} = nparticalcases;
+end
 
 %Split in test and training data
 p = x/100  ;    % proportion of rows to select for training
