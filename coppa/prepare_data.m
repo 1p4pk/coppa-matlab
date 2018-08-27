@@ -1,4 +1,4 @@
-function [dataTraining,dataTesting,unique_values,N, mapping] = prepare_data(filename, delimiter,timestamp_format,CaseID,Timestamp,Activity,x,split_stable, model, blow_up)
+function [dataTraining,dataTesting,unique_values,N, mapping] = prepare_data(filename, delimiter,timestamp_format,CaseID,Timestamp,Activity,x,split_stable, model, blow_up, max_num_context)
 %PREPARE_DATA 
 % Load csv file, transform as necessary and return training and test data
 % set
@@ -13,6 +13,7 @@ function [dataTraining,dataTesting,unique_values,N, mapping] = prepare_data(file
 %%      split_stable = produce same data and test set everytime or shuffle ("yes" or "no")
 %%      model = model type (e.g. "hmm" or "dbn")
 %%      blow_up = if to add additional cases to the data set for each partial trace of the log
+%%      max_num_context = maximum number of context attributes considered (e.g 4)
 %%
 %   Output
 %%      dataTraining = data set for training
@@ -52,11 +53,10 @@ end
 data(:,del_index) = [];
 
 %Allow max q columns, delete rest
-%q = 3;
-%[datlen datn] = size(data);
-%if datn>q
-%    data(:,[q+1:datn]) = [];
-%end
+[datlen datn] = size(data);
+if datn>max_num_context + 2
+    data(:,[max_num_context+1:datn]) = [];
+end
 
 %if hmm or pfa delete all columns but observation
 if strcmp(model,'hmm') || strcmp(model,'pfa')

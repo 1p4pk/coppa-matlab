@@ -12,10 +12,11 @@ grid_steps = 4; %Size of increment between states
 
 splitPercentage = 70; % Split Training Set
 splitStable = 'yes'; %Options: 'yes','no'. Determines if data and test set is always identical or random
-model = 'pfa'; %Options: 'hmm','pfa','dbn'
+model = 'dbn'; %Options: 'hmm','pfa','dbn'
 num_iter = [25 2]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
 dataset = 'sap-small'; %Options: 'sap','sap-small','bpi2013','test'
 blow_up_data = 'no'; %Options: 'yes','no'. If to add new cases for each partial trace of the log or not
+max_num_context = 5; %Options: any number > 0. Determines how many context attributes will be considered
 learn_new_model = 'yes'; %Options: 'yes','no'
 prediction_mode = 'distribution'; %Options: 'simple','distribution'. 'simple' not working at the moment
 draw_model = 'no'; %Options: 'yes', 'no'. Shows model of bayesian network
@@ -56,7 +57,7 @@ else
 end
 
 %Load and Prepare Data
-[dataTraining dataTesting unique_values N mapping] = prepare_data(filename, delimiter, timestamp_format,CaseID,Timestamp,Activity,splitPercentage, splitStable, model, blow_up_data); 
+[dataTraining dataTesting unique_values N mapping] = prepare_data(filename, delimiter, timestamp_format,CaseID,Timestamp,Activity,splitPercentage, splitStable, model, blow_up_data, max_num_context); 
 %% Define model and start learning
 if strcmp(learn_new_model,'yes')
     % Learn new model
