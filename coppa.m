@@ -14,7 +14,7 @@ splitPercentage = 70; % Split Training Set
 splitStable = 'yes'; %Options: 'yes','no'. Determines if data and test set is always identical or random
 model = 'pfa'; %Options: 'hmm','pfa','dbn'
 num_iter = [1 1]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
-dataset = 'test'; %Options: 'sap','sap-small','bpi2013','test'
+dataset = 'sap-small'; %Options: 'sap','sap-small','bpi2013','test'
 learn_new_model = 'yes'; %Options: 'yes','no'
 prediction_mode = 'distribution'; %Options: 'simple','distribution'. 'simple' not working at the moment
 draw_model = 'no'; %Options: 'yes', 'no'. Shows model of bayesian network
@@ -84,5 +84,5 @@ end
 
 [acc sens spec] = score_model(pred, rv, model);
 
-prediction_ngram(dataTraining,dataTesting,unique_values);
-[acc_n sens_n spec_n] = score_model(pred, rv, 'n-gram');
+[pred_n rv_n] = prediction_ngram(dataTraining,dataTesting,unique_values);
+[acc_n sens_n spec_n] = score_model(pred_n, rv_n, 'n-gram');
