@@ -15,29 +15,24 @@ evidence = create_evidence(dbnet, data);
 prediction = cell(1,ncases);
 real_value = cell(1,ncases);
 
-noPred = 0;
 for j=1:ncases
     engine = bk_inf_engine(dbnet);
-    tempEngine = engine;
     [ss T] = size(evidence{j});
     
-    k=T-steps;
-    noPred = noPred + 1;
-    engine = tempEngine;
     %In order to perform filtering, we add an empty evidence to the
     %actual evidence until t, such that we can do inference on the
     %hidden node in time slice t+steps
-    evidenceToEnter = evidence{j}(:,1:(k+steps-1));
+    evidenceToEnter = evidence{j}(:,1:(T-1));
     %@Matthias: how to set element in cell to [] ?
     if steps > 1
-        evidenceToEnter(:,k:(k+steps-1)) = evidenceToEnter(1,k);
+        evidenceToEnter(:,T-steps:(T-1)) = evidenceToEnter(1,T-steps);
     else
-        evidenceToEnter(:,k) = evidenceToEnter(1,k);
+        evidenceToEnter(:,T-steps) = evidenceToEnter(1,T-steps);
     end
     %enter evidence and choose filtering (smoothing is default)
     engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
     %calculate marginals on the hidden node in t+steps
-    mS = marginal_nodes(engine, 1, k+steps-1);
+    mS = marginal_nodes(engine, 1, T-1);
 
     %create static bayesian network to do inference on observed node
     %activity
@@ -57,14 +52,13 @@ for j=1:ncases
         bnetEvidence{1} = c;
         [bnetEngine, loglik] = enter_evidence(bnetEngine, bnetEvidence);
         mA = marginal_nodes(bnetEngine, 2);
-
         weightedPred = (mA.T *mS.T(c));
         cumulatedPred = cumulatedPred + weightedPred;
     end
     % cumulatedPred auf = 1 normalisieren?
     [M I] = max(cumulatedPred);
     prediction{j} = I;
-    real_value{j} = evidence{j}{2,k};
+    real_value{j} = evidence{j}{2,T-steps};
 end
 disp('Prediction Finished');
 end
