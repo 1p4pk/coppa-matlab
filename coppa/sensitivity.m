@@ -31,9 +31,12 @@ for j=1:numberOfSymbols
     if p>0
         sensitivity(j) = tp/p;
     else
-        sensitivity(j) = 0;
+        sensitivity(j) = NaN;
     end
 end
-score = mean(sensitivity);
+score = mean(sensitivity,'omitnan');
+if isnan(score)
+    score = 0;
+end
 end
 

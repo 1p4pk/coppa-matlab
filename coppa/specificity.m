@@ -32,9 +32,12 @@ for j=1:numberOfSymbols
     if n>0
         specificity(j) = tn/n;
     else
-        specificity(j) = 0;
+        specificity(j) = NaN;
     end
 end
-score = mean(specificity);
+score = mean(specificity,'omitnan');
+if isnan(score)
+    score = 0;
+end
 end
 
