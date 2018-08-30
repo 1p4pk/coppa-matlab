@@ -8,13 +8,13 @@ addpath(genpath('./coppa/'));
 % State range
 min_state = 10; %Minimum number of states
 max_state = 10; %Maximum number of states
-grid_steps = 4; %Size of increment between states
+grid_steps = 5; %Size of increment between states
 
 splitPercentage = 70; % Split Training Set
 splitStable = 'yes'; %Options: 'yes','no'. Determines if data and test set is always identical or random
 model = 'dbn'; %Options: 'hmm','pfa','dbn'
-num_iter = [25 2]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
-dataset = 'sap-small'; %Options: 'sap','sap-small','bpi2013','test'
+num_iter = [20 1]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
+dataset = 'bpi2013'; %Options: 'sap','sap-small','bpi2013','test'
 blow_up_data = 'no'; %Options: 'yes','no'. If to add new cases for each partial trace of the log or not
 max_num_context = 5; %Options: any number > 0. Determines how many context attributes will be considered
 learn_new_model = 'yes'; %Options: 'yes','no'
@@ -34,10 +34,10 @@ elseif strcmp(dataset,'sap-small')
     timestamp_format = 'yyyy-MM-dd HH:mm:ss.SSSSSSS'; 
     CaseID = 1; Activity = 2; Timestamp = 3;    
 elseif strcmp(dataset,'bpi2013')
-    filename = './example/bpi2013/VINST cases closed problems.csv';
+    filename = './example/bpi2013/VINST cases closed problems_COPPA.csv';
     delimiter = ';'; 
     timestamp_format = 'yyyy-MM-dd''T''HH:mm:ssXXX'; 
-    CaseID = 1; Activity = 3; Timestamp = 2;
+    CaseID = 1; Activity = 2; Timestamp = 3;
 elseif strcmp(dataset,'bpi2012a')
     filename = './example/bpi2012/financial_log_application_process_ressourceContext.csv';
     delimiter = ';'; 
