@@ -22,17 +22,18 @@ for j=1:ncases
     %In order to perform filtering, we add an empty evidence to the
     %actual evidence until t, such that we can do inference on the
     %hidden node in time slice t+steps
-    evidenceToEnter = evidence{j}(:,1:(T-1));
+    evidenceToEnter = evidence{j}(:,1:T);
     %@Matthias: how to set element in cell to [] ?
     if steps > 1
-        evidenceToEnter(:,T-steps:(T-1)) = evidenceToEnter(1,T-steps);
+        %if we want to do steps > 1 we have to adjust size of cell EvidenceToEnter, right?
+        evidenceToEnter(:,T-steps:(T-1)) = evidenceToEnter(1,T-steps); 
     else
-        evidenceToEnter(:,T-steps) = evidenceToEnter(1,T-steps);
+        evidenceToEnter(:,T) = evidenceToEnter(1,T);
     end
     %enter evidence and choose filtering (smoothing is default)
     engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
     %calculate marginals on the hidden node in t+steps
-    mS = marginal_nodes(engine, 1, T-1);
+    mS = marginal_nodes(engine, 1, T-1+steps);
 
     %create static bayesian network to do inference on observed node
     %activity
@@ -58,7 +59,7 @@ for j=1:ncases
     % cumulatedPred auf = 1 normalisieren?
     [M I] = max(cumulatedPred);
     prediction{j} = I;
-    real_value{j} = evidence{j}{2,T-steps};
+    real_value{j} = evidence{j}{2,T-1+steps};
 end
 disp('Prediction Finished');
 end
