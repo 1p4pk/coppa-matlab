@@ -1,5 +1,4 @@
 %% Import required files/functions/libraries
-addpath(genpath('./data_in/'));
 addpath(genpath('./libs/'));
 addpath(genpath('./examples/'));
 addpath(genpath('./coppa/'));
@@ -14,7 +13,7 @@ splitPercentage = 70; % Split Training Set
 splitStable = 'yes'; %Options: 'yes','no'. Determines if data and test set is always identical or random
 model = 'dbn'; %Options: 'hmm','pfa','dbn'
 num_iter = [20 1]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
-dataset = 'bpi2013'; %Options: 'sap','sap-small','bpi2013','test'
+dataset = 'test'; %Options: 'sap','sap-small','bpi2013','test'
 blow_up_data = 'no'; %Options: 'yes','no'. If to add new cases for each partial trace of the log or not
 max_num_context = 5; %Options: any number > 0. Determines how many context attributes will be considered
 learn_new_model = 'yes'; %Options: 'yes','no'
