@@ -1,4 +1,4 @@
-function [prediction real_value] = prediction(dbnet, data, steps)
+function [prediction real_value prediction_probabilities] = prediction(dbnet, data, steps)
 %Calculate the prediction based on
 %   dbnet = supplied dynamic bayesian network
 %   ev = log case at who's end the prediction happens
@@ -13,6 +13,7 @@ disp('Start Prediction');
 ncases = length(data);
 evidence = create_evidence(dbnet, data); 
 prediction = cell(1,ncases);
+prediction_probabilities = cell(dbnet.node_sizes_slice(2),ncases);
 real_value = cell(1,ncases);
 
 for j=1:ncases
@@ -59,6 +60,9 @@ for j=1:ncases
     % cumulatedPred auf = 1 normalisieren?
     [M I] = max(cumulatedPred);
     prediction{j} = I;
+    %@Matthias, how to properly construct this cell of different activity
+    %predictions?
+    prediction_probabilities{j}(:,j) = cumulatedPred; 
     real_value{j} = evidence{j}{2,T-1+steps};
 end
 disp('Prediction Finished');

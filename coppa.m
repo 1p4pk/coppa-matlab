@@ -5,22 +5,22 @@ addpath(genpath('./coppa/'));
 
 %% User Input
 %Model
-model = {'pfa';'dbn'}; %Options: 'hmm','pfa','dbn'
+model = {'pfa'}; %Options: 'hmm','pfa','dbn'
 num_iter = [20 1]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
 % State range
-min_state = 10; %Minimum number of states
-max_state = 10; %Maximum number of states
+min_state = 15; %Minimum number of states
+max_state = 20; %Maximum number of states
 grid_steps = 5; %Size of increment between states
 %Data
-dataset = {'test' 'test-sametrace'}; %Options: 'sap','sap-small','bpi2013','test'
+dataset = {'bpi2012a'}; %Options: 'sap','sap-small','bpi2013','test'
 splitPercentage = 70; % Split Training Set
 splitStable = 'yes'; %Options: 'yes','no'. Determines if data and test set is always identical or random
-blow_up_data = 'no'; %Options: 'yes','no'. If to add new cases for each partial trace of the log or not
+blow_up_data = 'yes'; %Options: 'yes','no'. If to add new cases for each partial trace of the log or not
 max_num_context = 5; %Options: any number > 0. Determines how many context attributes will be considered
 % Learning & Prediction
-learn_new_model = 'yes'; %Options: 'yes','no'. Learn new model or load from disk.
+learn_new_model = 'no'; %Options: 'yes','no'. Learn new model or load from disk.
 prediction_mode = 'distribution'; %Options: 'simple','distribution'. 'simple' not working at the moment
-ngram_length = 5; %Options: any number > 0. Determines maximum length of ngrams for benchmark.
+ngram_length = 3; %Options: any number > 0. Determines maximum length of ngrams for benchmark.
 % Others
 draw_model = 'no'; %Options: 'yes', 'no'. Shows model of bayesian network
 
@@ -91,7 +91,8 @@ for j=1:num_datasets
         if strcmp(prediction_mode,'simple')
             [pred rv acc] = prediction_simple(bestoverallbnet, dataTesting);
         else
-            [pred rv] = prediction(bestoverallbnet, dataTesting);
+            [pred rv pred_prob] = prediction(bestoverallbnet, dataTesting);
+            %cell2csv('test.csv',pred_prob,";");
         end
 
         [acc sens spec]  = score_model(pred, rv, model{i});
