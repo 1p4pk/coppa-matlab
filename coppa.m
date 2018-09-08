@@ -44,7 +44,12 @@ for j=1:num_datasets
         filename = './example/sap/SAP_P2P_COPPA_SMALL.csv'; 
         delimiter = ';'; 
         timestamp_format = 'yyyy-MM-dd HH:mm:ss.SSSSSSS'; 
-        CaseID = 1; Activity = 2; Timestamp = 3;    
+        CaseID = 1; Activity = 2; Timestamp = 3;   
+    elseif strcmp(dataset{j},'sap-context')
+        filename = './example/sap/SAP_P2P_COPPA_CONTEXT.csv'; 
+        delimiter = ';'; 
+        timestamp_format = 'yyyy-MM-dd HH:mm:ss.SSSSSSS'; 
+        CaseID = 1; Activity = 2; Timestamp = 3;   
     elseif strcmp(dataset{j},'bpi2013')
         filename = './example/bpi2013/VINST cases closed problems_COPPA.csv';
         delimiter = ';'; 
