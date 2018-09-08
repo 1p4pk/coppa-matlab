@@ -1,4 +1,4 @@
-function [dataTraining,dataTesting,unique_values,N, mapping] = prepare_data(filename, delimiter,timestamp_format,CaseID,Timestamp,Activity,x,split_stable, model, blow_up, max_num_context)
+function [dataTraining,dataTesting,unique_values,N, mapping] = prepare_data(filename, delimiter,timestamp_format,CaseID,Timestamp,Activity,x,split_stable, model, blow_up_train, blow_up_test, max_num_context)
 %PREPARE_DATA 
 % Load csv file, transform as necessary and return training and test data
 % set
@@ -12,7 +12,8 @@ function [dataTraining,dataTesting,unique_values,N, mapping] = prepare_data(file
 %%      x = percentage of training set split size (e.g. "70")
 %%      split_stable = produce same data and test set everytime or shuffle ("yes" or "no")
 %%      model = model type (e.g. "hmm" or "dbn")
-%%      blow_up = if to add additional cases to the data set for each partial trace of the log
+%%      blow_up_train = if to add additional cases to the data set for each partial trace of the learn log
+%%      blow_up_test = if to add additional cases to the data set for each partial trace of the test log
 %%      max_num_context = maximum number of context attributes considered (e.g 4)
 %%
 %   Output
@@ -100,28 +101,6 @@ for i=1:ncases
 end
 data_cell(del_ind) = [];
 
-%Blow up data set by inserting each partial sequence of a case as a new
-%case
-ncases = size(data_cell,1);
-if strcmp(blow_up,'yes')
-    nparticalcases = 0;
-    for i=1:ncases
-        T = size(data_cell{i},1);
-        nparticalcases = nparticalcases + T - 2; %-2 because minimum trace length is 3
-    end
-    data_blown_up = cell(nparticalcases,1);
-    ind = 0;
-    for i=1:ncases
-        T = size(data_cell{i},1);
-        for j=3:T
-            ind = ind + 1;
-            data_blown_up{ind} = data_cell{i}(1:j,:);
-        end
-    end
-data_cell = data_blown_up;    
-unique_values{1} = nparticalcases;
-end
-
 %Split in test and training data
 p = x/100  ;    % proportion of rows to select for training
 N = size(data_cell,1);  % total number of rows 
@@ -135,6 +114,49 @@ dataTraining = data_cell(tf,:) ;
 dataTesting = data_cell(~tf,:) ;
 
 N = datn -1 + 1; % number of variables in one time slice. datn + 1 (for hidden state) -1 (for case id column)
+
+%Blow up data sets by inserting each partial sequence of a case as a new case
+ncasesTrain = size(dataTraining,1);
+if strcmp(blow_up_train,'yes')
+    nparticalcases = 0;
+    for i=1:ncasesTrain
+        T = size(dataTraining{i},1);
+        nparticalcases = nparticalcases + T - 2; %-2 because minimum trace length is 3
+    end
+    data_blown_up = cell(nparticalcases,1);
+    ind = 0;
+    for i=1:ncasesTrain
+        T = size(dataTraining{i},1);
+        for j=3:T
+            ind = ind + 1;
+            data_blown_up{ind} = dataTraining{i}(1:j,:);
+        end
+    end
+    dataTraining = data_blown_up;    
+    ncasesTrain = nparticalcases;
+end
+
+ncasesTest = size(dataTesting,1);
+if strcmp(blow_up_test,'yes')
+    nparticalcases = 0;
+    for i=1:ncasesTest
+        T = size(dataTesting{i},1);
+        nparticalcases = nparticalcases + T - 2; %-2 because minimum trace length is 3
+    end
+    data_blown_up = cell(nparticalcases,1);
+    ind = 0;
+    for i=1:ncasesTest
+        T = size(dataTesting{i},1);
+        for j=3:T
+            ind = ind + 1;
+            data_blown_up{ind} = dataTesting{i}(1:j,:);
+        end
+    end
+    dataTesting = data_blown_up;    
+    ncasesTest = nparticalcases;
+end
+
+unique_values{1} = ncasesTrain + ncasesTest;
 
 disp('Finish Loading Data');
 disp('');
