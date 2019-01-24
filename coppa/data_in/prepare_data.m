@@ -56,7 +56,7 @@ data(:,del_index) = [];
 %Allow max q columns, delete rest
 [datlen datn] = size(data);
 if datn>max_num_context + 2
-    data(:,[max_num_context+1:datn]) = [];
+    data(:,[max_num_context+3:datn]) = [];
 end
 
 %if hmm or pfa delete all columns but observation
