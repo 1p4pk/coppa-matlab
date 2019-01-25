@@ -101,14 +101,14 @@ for j=1:num_datasets
             %cell2csv('test.csv',pred_prob,";");
         end
 
-        [acc sens spec]  = score_model(pred, rv, model{i});
+        [acc sens spec]  = score_model(pred, rv);
         result{j}{i,1} = acc;
         result{j}{i,2} = sens;
         result{j}{i,3} = spec;
     end
     %% N-Gram prediction for benchmark
     [pred_n rv_n] = prediction_ngram(dataTraining,dataTesting,unique_values,ngram_length);
-    [acc_n sens_n spec_n] = score_model(pred_n, rv_n, [num2str(ngram_length) '-gram']);
+    [acc_n sens_n spec_n] = score_model(pred_n, rv_n);
     result{j}{num_models + 1,1} = acc_n;
     result{j}{num_models + 1,2} = sens_n;
     result{j}{num_models + 1,3} = spec_n;
