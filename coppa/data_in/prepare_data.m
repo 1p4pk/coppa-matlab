@@ -29,7 +29,7 @@ disp('Start Loading Data');
 data = import_csv(filename, delimiter); 
 
 %Convert Timestamp
-data(:,Timestamp) = datetime(data(:,Timestamp),'TimeZone','Europe/London','InputFormat',timestamp_format);
+data(:,Timestamp) = datetime(data(:,Timestamp),'TimeZone','Europe/London','Format',timestamp_format);
 
 data = sortrows(data,[CaseID,Timestamp]); %Make sure log is sorted by CaseID and Timestamp
 data(:,Timestamp) = []; %Remove Timestamp Column as it is not needed anymore
