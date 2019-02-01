@@ -1,4 +1,4 @@
-function [bestoverallbnet,bestoverallstate] = stategrid_learning(model, N,dataTraining,num_iter, min_state,max_state,grid_steps,unique_values)
+function [bestoverallbnet,bestoverallstate] = stategrid_learning(model, N,dataTraining,num_iter, min_state,max_state,grid_steps,unique_values,background_variables,symptom_variables)
 %STATEGRID_LEARNING
 % Create model structure and start learning several times for different state values. 
 % Best model in regards to log likelihood is returned
@@ -20,13 +20,16 @@ function [bestoverallbnet,bestoverallstate] = stategrid_learning(model, N,dataTr
 bestoverallloglik = -inf; %initialize
 for q=min_state:grid_steps:max_state % iterate through state space
     disp(['Start Learning ' model ' model. State size: ' num2str(q) ', repeat ' num2str(num_iter(2)) ' times']);
-    if model=='dbn'
+    if strcmp(model,'dbn')
     bnet = create_dbn(N,unique_values,q);
     [bestbnet bestloglik] = learning(bnet,N,dataTraining,num_iter);
-    elseif model=='hmm'
+    elseif strcmp(model,'dbn_new')
+        bnet = create_dbn_new(N,unique_values,q,background_variables,symptom_variables);
+        [bestbnet bestloglik] = learning(bnet,N,dataTraining,num_iter);
+    elseif strcmp(model,'hmm')
         bnet = create_hmm(unique_values,q);
         [bestbnet bestloglik] = learning(bnet,2,dataTraining,num_iter);
-    elseif model=='pfa'
+    elseif strcmp(model,'pfa')
         bnet = create_pfa(unique_values,q);
         [bestbnet bestloglik] = learning(bnet,2,dataTraining,num_iter);
     end
