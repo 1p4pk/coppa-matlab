@@ -5,14 +5,14 @@ addpath(genpath('./coppa/'));
 
 %% User Input
 % Model
-model = {'dbn_new'}; %Options: 'hmm','pfa','dbn', 'dbn_new'
+model = {'dbn'}; %Options: 'hmm','pfa','dbn', 'dbn_new'
 num_iter = [10 1]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
 % State range
 min_state = 10; %Minimum number of states
 max_state = 10; %Maximum number of states
 grid_steps = 5; %Size of increment between states
 % Data
-dataset = {'bpi2013'}; %Options: 'sap','sap-small','bpi2013','test'
+dataset = {'test'}; %Options: 'sap','sap-small','bpi2013','test'
 splitPercentage = 70; % Split Training Set
 splitStable = 'yes'; %Options: 'yes','no'. Determines if data and test set is always identical or random
 blow_up_test = 'yes'; %Options: 'yes','no'. If to add new cases for each partial trace of the test log or not
@@ -107,6 +107,8 @@ for j=1:num_datasets
         result{j}{i,1} = acc;
         result{j}{i,2} = sens;
         result{j}{i,3} = spec;
+        %% Start analysis
+    impact_of_evidence(bestoverallbnet, dataTesting, model{i}, symptom_variables, mapping);
     end
     %% N-Gram prediction for benchmark
     [pred_n rv_n] = prediction_ngram(dataTraining,dataTesting,unique_values,ngram_length);
@@ -114,6 +116,9 @@ for j=1:num_datasets
     result{j}{num_models + 1,1} = acc_n;
     result{j}{num_models + 1,2} = sens_n;
     result{j}{num_models + 1,3} = spec_n;
+    
+    
+    
 end
 
 disp('Results:');
