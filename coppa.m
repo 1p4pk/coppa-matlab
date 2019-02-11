@@ -4,22 +4,24 @@ addpath(genpath('./examples/'));
 addpath(genpath('./coppa/'));
 
 %% User Input
-%Model
-model = {'pfa'}; %Options: 'hmm','pfa','dbn'
-num_iter = [20 1]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
+% Model
+model = {'dbn_new'}; %Options: 'hmm','pfa','dbn', 'dbn_new'
+num_iter = [10 1]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
 % State range
 min_state = 10; %Minimum number of states
-max_state = 15; %Maximum number of states
+max_state = 10; %Maximum number of states
 grid_steps = 5; %Size of increment between states
-%Data
+% Data
 dataset = {'bpi2013'}; %Options: 'sap','sap-small','bpi2013','test'
 splitPercentage = 70; % Split Training Set
 splitStable = 'yes'; %Options: 'yes','no'. Determines if data and test set is always identical or random
 blow_up_test = 'yes'; %Options: 'yes','no'. If to add new cases for each partial trace of the test log or not
 blow_up_train = 'no'; %Options: 'yes','no'. If to add new cases for each partial trace of the train log or not
-max_num_context = 1; %Options: any number > 0. Determines how many context attributes will be considered
+% Context
+max_num_context = 1; %Options: any number > 0. Determines how many context attributes will be considered, number should equal the number of background and symptom variables
+background_variables = []; symptom_variables = [3]; %Options: numbers > 2 starting with 3. Number should equal position in csv-import plus 1 for the timestamp column
 % Learning & Prediction
-learn_new_model = 'no'; %Options: 'yes','no'. Learn new model or load from disk.
+learn_new_model = 'yes'; %Options: 'yes','no'. Learn new model or load from disk.
 prediction_mode = 'distribution'; %Options: 'simple','distribution'. 'simple' not working at the moment
 ngram_length = 3; %Options: any number > 0. Determines maximum length of ngrams for benchmark.
 % Others
@@ -77,7 +79,7 @@ for j=1:num_datasets
         %% Define model and start learning
         if strcmp(learn_new_model,'yes')
             % Learn new model
-            [bestoverallbnet bestoverallstate] = stategrid_learning(model{i}, N ,dataTraining,num_iter,min_state, max_state,grid_steps, unique_values);
+            [bestoverallbnet bestoverallstate] = stategrid_learning(model{i}, N ,dataTraining,num_iter,min_state, max_state,grid_steps, unique_values, background_variables, symptom_variables);
             %save the best model on disk
             save_name = ['bestbnet_' model{i} '_' dataset{j} '.mat'];
             save(save_name,'bestoverallbnet');
@@ -97,7 +99,7 @@ for j=1:num_datasets
         if strcmp(prediction_mode,'simple')
             [pred rv acc] = prediction_simple(bestoverallbnet, dataTesting);
         else
-            [pred rv pred_prob] = prediction(bestoverallbnet, dataTesting);
+            [pred rv pred_prob] = prediction(bestoverallbnet, dataTesting, symptom_variables);
             %cell2csv('test.csv',pred_prob,";");
         end
 
