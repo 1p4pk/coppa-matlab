@@ -1,4 +1,4 @@
-function [] = identify_minimum_maximum_beliefs(dbnet, data, model, symptom_variables, mapping)
+function [min, normal, max] = identify_minimum_maximum_beliefs(dbnet, data, model, symptom_variables, mapping)
 % IDENTIFY_MINIMUM_MAXIMUM_BELIEFS
 % Identify minimum and maximum beliefs for activity given all possible
 % observations on the context variables and evidence.
@@ -16,40 +16,47 @@ function [] = identify_minimum_maximum_beliefs(dbnet, data, model, symptom_varia
 disp('Start identifying minimum and maximum beliefs');
 
 ncases = length(data);
-evidence = create_evidence(dbnet, data); 
+evidence = create_evidence(dbnet, data);
+min = [];
+max = [];
+normal = [];
 
 for j=1:ncases
     [ss T] = size(evidence{j});
-    disp('Case:');
-    disp(evidence{j});
-    disp('Hypothesis variable activity')
-    for i=3:length(mapping)
-        n_unique = length(mapping{i});
-        disp(['Context ' num2str(i)]);
-        disp(['Number of unique values ' num2str(n_unique)]);
-        for k=0:n_unique
-            engine = bk_inf_engine(dbnet);
-            evidenceToEnter = evidence{j}(:,1:T);
-            if k==0
-                conditional = 'only evidence';
-                if strcmp(model, 'dbn')
-                    evidenceToEnter(:, T) = evidenceToEnter(1,T);
-                else
-                    evidenceToEnter([2 symptom_variables], T) = evidenceToEnter(1,T);
-                end
-            else
-                evidenceToEnter(:,T) = evidenceToEnter(1,T);
-                evidenceToEnter(i,T) = num2cell(k);
-                conditional = num2str(k);
-            end
-            disp('Evidence:');
-            disp(evidenceToEnter);
-            engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
-            mA = marginal_nodes(engine, 2, T);
-            disp(['Posterior distribution for ' conditional]);
-            disp(mA.T);
+
+    n_unique = length(mapping{3});
+    values_min = ones(1,length(mapping{2}));
+    values_max = zeros(1,length(mapping{2}));
+    for k=0:n_unique
+        
+        engine = bk_inf_engine(dbnet);
+        evidenceToEnter = evidence{j}(:,1:T);
+        evidenceToEnter(:, T) = evidenceToEnter(1,T);
+        if k==0
+           evidenceToEnter(3, T-1) = evidenceToEnter(1,T);
+        else
+           evidenceToEnter(3, T-1) = num2cell(k); 
         end
+        
+        engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
+        mA = marginal_nodes(engine, 2, T);
+        
+        if k==0
+           normal = [normal; reshape(mA.T, [1, length(mA.T)])];
+        else
+           for i=1:length(mapping{2})
+               if values_min(1,i) > mA.T(i)
+                   values_min(1,i) = mA.T(i);
+               end
+               if values_max(1,i) < mA.T(i)
+                   values_max(1,i) = mA.T(i);
+               end
+           end    
+        end
+        
     end
+    min = [min; values_min];
+    max = [max; values_max];
 end
 end
 
