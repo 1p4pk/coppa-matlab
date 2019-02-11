@@ -32,10 +32,8 @@ for j=1:ncases
         engine = bk_inf_engine(dbnet);
         evidenceToEnter = evidence{j}(:,1:T);
         evidenceToEnter(:, T) = evidenceToEnter(1,T);
-        if k==0
-           evidenceToEnter(3, T-1) = evidenceToEnter(1,T);
-        else
-           evidenceToEnter(3, T-1) = num2cell(k); 
+        if k>0
+           evidenceToEnter(3, T) = num2cell(k); 
         end
         
         engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);

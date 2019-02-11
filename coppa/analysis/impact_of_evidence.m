@@ -41,17 +41,11 @@ for j=1:ncases
     evidenceToEnter(:,T) = evidenceToEnter(1,T);
     engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
     mA = marginal_nodes(engine, 2, T);
-     if isnan(mA.T(real_v)/apriori)
-        if mA.T(real_v) > 0.5
-            values = [values, 2];
-        elseif mA.T(real_v) > 0.25
-            values = [values, 1];
-        else
-            values = [values, 0];
-        end
+    if isnan(mA.T(real_v)/apriori)
+        values = [values, 0];
     else
         values = [values, mA.T(real_v)/apriori];
-     end
+    end
   
     %     disp('Evidence: 0  1');
     engine = bk_inf_engine(dbnet);
@@ -61,13 +55,7 @@ for j=1:ncases
     engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
     mA = marginal_nodes(engine, 2, T);
     if isnan(mA.T(real_v)/apriori)
-        if mA.T(real_v) > 0.5
-            values = [values, 2];
-        elseif mA.T(real_v) > 0.25
-            values = [values, 1];
-        else
-            values = [values, 0];
-        end
+        values = [values, 0];
     else
         values = [values, mA.T(real_v)/apriori];
     end
@@ -79,14 +67,8 @@ for j=1:ncases
     engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
     mA = marginal_nodes(engine, 2, T);
     if isnan(mA.T(real_v)/apriori)
-        if mA.T(real_v) > 0.5
-            values = [values, 2];
-        elseif mA.T(real_v) > 0.25
-            values = [values, 1];
-        else
-            values = [values, 0];
-        end
-     else
+        values = [values, 0];
+    else
         values = [values, mA.T(real_v)/apriori];
     end
     result = [result;values];
