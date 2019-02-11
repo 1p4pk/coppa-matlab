@@ -1,4 +1,4 @@
-function [] = impact_of_evidence(dbnet, data, model, symptom_variables, mapping)
+function [result] = impact_of_evidence(dbnet, data, model, symptom_variables, mapping)
 % IMPACT_OF_EVIDENCE_SUBSETS
 % Identify minimum and maximum beliefs for activity given all possible
 % observations on the context variables and evidence.
@@ -16,83 +16,81 @@ function [] = impact_of_evidence(dbnet, data, model, symptom_variables, mapping)
 disp('Start identifying impact of evidence subsets');
 
 ncases = length(data);
-evidence = create_evidence(dbnet, data); 
+evidence = create_evidence(dbnet, data);
+result = [];
 
 for j=1:ncases
     [ss T] = size(evidence{j});
-    disp('Case:');
-    disp(evidence{j});
-    disp('Hypothesis variable activity:')
+    
     % Assume that we we observe the activity to be the actual real value
     real_v = cell2num(evidence{j}(2,T));
-    disp(['Hypothesis: Activity = ' mapping{2}{real_v}]);
+    
     engine = bk_inf_engine(dbnet);
     evidenceToEnter = evidence{j}(:,1:T);
     evidenceToEnter(:,T-1:T) = evidenceToEnter(1,T);
     engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
     mA = marginal_nodes(engine, 2, T);
-    disp(['P(' mapping{2}{real_v} ') = ' num2str(mA.T(real_v))])
-    disp('Evidence: A CT-1 CT');
+    apriori = mA.T(real_v);
+    values = [];
+%     disp('Evidence: A CT-1');
     
-    disp('Evidence: 0  0   1');
+%     disp('Evidence: 1  0');
     engine = bk_inf_engine(dbnet);
     evidenceToEnter = evidence{j}(:,1:T);
-    evidenceToEnter(:,T-1) = evidenceToEnter(1,T);
-    evidenceToEnter(2,T) = evidenceToEnter(1,T);
+    evidenceToEnter(3,T-1) = evidenceToEnter(1,T);
+    evidenceToEnter(:,T) = evidenceToEnter(1,T);
     engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
     mA = marginal_nodes(engine, 2, T);
-    disp(['P(' mapping{2}{real_v} '|CT) = ' num2str(mA.T(real_v))])
-    
-    disp('Evidence: 0  1   0');
+     if isnan(mA.T(real_v)/apriori)
+        if mA.T(real_v) > 0.5
+            values = [values, 2];
+        elseif mA.T(real_v) > 0.25
+            values = [values, 1];
+        else
+            values = [values, 0];
+        end
+    else
+        values = [values, mA.T(real_v)/apriori];
+     end
+  
+    %     disp('Evidence: 0  1');
     engine = bk_inf_engine(dbnet);
     evidenceToEnter = evidence{j}(:,1:T);
     evidenceToEnter(2,T-1) = evidenceToEnter(1,T);
     evidenceToEnter(:,T) = evidenceToEnter(1,T);
     engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
     mA = marginal_nodes(engine, 2, T);
-    disp(['P(' mapping{2}{real_v} '|CT-1) = ' num2str(mA.T(real_v))])
+    if isnan(mA.T(real_v)/apriori)
+        if mA.T(real_v) > 0.5
+            values = [values, 2];
+        elseif mA.T(real_v) > 0.25
+            values = [values, 1];
+        else
+            values = [values, 0];
+        end
+    else
+        values = [values, mA.T(real_v)/apriori];
+    end
     
-    disp('Evidence: 0  1   1');
-    engine = bk_inf_engine(dbnet);
-    evidenceToEnter = evidence{j}(:,1:T);
-    evidenceToEnter(2,T-1:T) = evidenceToEnter(1,T);
-    engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
-    mA = marginal_nodes(engine, 2, T);
-    disp(['P(' mapping{2}{real_v} '|CT-1,CT) = ' num2str(mA.T(real_v))])
-    
-    disp('Evidence: 1  0   0');
-    engine = bk_inf_engine(dbnet);
-    evidenceToEnter = evidence{j}(:,1:T);
-    evidenceToEnter(3,T-1) = evidenceToEnter(1,T);
-    evidenceToEnter(:,T) = evidenceToEnter(1,T);
-    engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
-    mA = marginal_nodes(engine, 2, T);
-    disp(['P(' mapping{2}{real_v} '|A) = ' num2str(mA.T(real_v))])
-    
-    disp('Evidence: 1  0   1');
-    engine = bk_inf_engine(dbnet);
-    evidenceToEnter = evidence{j}(:,1:T);
-    evidenceToEnter(3,T-1) = evidenceToEnter(1,T);
-    evidenceToEnter(2,T) = evidenceToEnter(1,T);
-    engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
-    mA = marginal_nodes(engine, 2, T);
-    disp(['P(' mapping{2}{real_v} '|A,CT) = ' num2str(mA.T(real_v))])
-    
-    disp('Evidence: 1  1   0');
+%     disp('Evidence: 1  1');
     engine = bk_inf_engine(dbnet);
     evidenceToEnter = evidence{j}(:,1:T);
     evidenceToEnter(:,T) = evidenceToEnter(1,T);
     engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
     mA = marginal_nodes(engine, 2, T);
-    disp(['P(' mapping{2}{real_v} '|A,CT-1) = ' num2str(mA.T(real_v))])
-    
-    disp('Evidence: 1  1   1');
-    engine = bk_inf_engine(dbnet);
-    evidenceToEnter = evidence{j}(:,1:T);
-    evidenceToEnter(2,T) = evidenceToEnter(1,T);
-    engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
-    mA = marginal_nodes(engine, 2, T);
-    disp(['P(' mapping{2}{real_v} '|A,CT-1,CT) = ' num2str(mA.T(real_v))])
+    if isnan(mA.T(real_v)/apriori)
+        if mA.T(real_v) > 0.5
+            values = [values, 2];
+        elseif mA.T(real_v) > 0.25
+            values = [values, 1];
+        else
+            values = [values, 0];
+        end
+     else
+        values = [values, mA.T(real_v)/apriori];
+    end
+    result = [result;values];
 end
+disp('Finished identifying impact of evidence subsets');
 end
 
