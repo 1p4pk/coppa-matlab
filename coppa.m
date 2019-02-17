@@ -5,11 +5,12 @@ addpath(genpath('./coppa/'));
 
 %% User Input
 % Model
-model = {'dbn_new'}; %Options: 'hmm','pfa','dbn', 'dbn_new'
-num_iter = [10 1]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
+model = {'dbn'}; %Options: 'hmm','pfa','dbn', 'dbn_new'
+analysis = {'impact_of_evidence'};  % Options: 'impact_of_evidence', 'identifiy_min_max_beliefs', 'impact_of_findings', 'what_if'
+num_iter = [15 1]; %number of times EM is iterated | number of times the model will be initialized with different random values to avoid local optimum 
 % State range
 min_state = 10; %Minimum number of states
-max_state = 10; %Maximum number of states
+max_state = 20; %Maximum number of states
 grid_steps = 5; %Size of increment between states
 % Data
 dataset = {'bpi2013'}; %Options: 'sap','sap-small','bpi2013','test'
@@ -21,7 +22,7 @@ blow_up_train = 'no'; %Options: 'yes','no'. If to add new cases for each partial
 max_num_context = 1; %Options: any number > 0. Determines how many context attributes will be considered, number should equal the number of background and symptom variables
 background_variables = []; symptom_variables = [3]; %Options: numbers > 2 starting with 3. Number should equal position in csv-import plus 1 for the timestamp column
 % Learning & Prediction
-learn_new_model = 'yes'; %Options: 'yes','no'. Learn new model or load from disk.
+learn_new_model = 'no'; %Options: 'yes','no'. Learn new model or load from disk.
 prediction_mode = 'distribution'; %Options: 'simple','distribution'. 'simple' not working at the moment
 ngram_length = 3; %Options: any number > 0. Determines maximum length of ngrams for benchmark.
 % Others
@@ -107,6 +108,24 @@ for j=1:num_datasets
         result{j}{i,1} = acc;
         result{j}{i,2} = sens;
         result{j}{i,3} = spec;
+        
+        %% Start analysis
+        if strcmp(analysis,'impact_of_evidence')
+            impact = impact_of_evidence(bestoverallbnet, dataTesting, model{i}, symptom_variables, mapping);        
+        end
+        
+        if strcmp(analysis,'identifiy_min_max_beliefs')
+            [minimum, normal, maximum]= identify_minimum_maximum_beliefs(bestoverallbnet, dataTesting, model{i}, symptom_variables, mapping);        
+        end
+        
+        if strcmp(analysis,'impact_of_findings')
+            impact_of_findings(bestoverallbnet, dataTesting, model{i}, symptom_variables, mapping);        
+        end
+        
+        if strcmp(analysis,'what_if')
+            what_if(bestoverallbnet, dataTesting, model{i}, symptom_variables, mapping, max_num_context);        
+        end
+
     end
     %% N-Gram prediction for benchmark
     [pred_n rv_n] = prediction_ngram(dataTraining,dataTesting,unique_values,ngram_length);
