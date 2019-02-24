@@ -1,4 +1,4 @@
-function [prediction real_value prediction_probabilities] = prediction(dbnet, data, symptom_variables, steps)
+function [prediction real_value prediction_probabilities] = prediction(dbnet, data, model, symptom_variables, steps)
 %Calculate the prediction based on
 %   dbnet = supplied dynamic bayesian network
 %   ev = log case at who's end the prediction happens
@@ -29,7 +29,11 @@ for j=1:ncases
         %if we want to do steps > 1 we have to adjust size of cell EvidenceToEnter, right?
         evidenceToEnter(:,T-steps:(T-1)) = evidenceToEnter(1,T-steps); 
     else
-        evidenceToEnter([2 symptom_variables], T) = evidenceToEnter(1,T);
+        if strcmp(model, 'dbn_new')
+            evidenceToEnter([2 symptom_variables], T) = evidenceToEnter(1,T);
+        else
+            evidenceToEnter(:, T) = evidenceToEnter(1,T);
+        end
     end
     %enter evidence and choose filtering (smoothing is default)
     engine = enter_evidence(engine, evidenceToEnter, 'filter', 1);
