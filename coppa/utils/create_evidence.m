@@ -7,7 +7,7 @@ function [cases] = create_evidence(bnet,data_cell,onodes)
  end
 
 ncases = length(data_cell);
-    
+empty_cell = cell(1,1);
 cases = cell(1, ncases);
 N = bnet.nnodes_per_slice;
 
@@ -15,8 +15,9 @@ N = bnet.nnodes_per_slice;
       T = size(data_cell{i},1);
       ev = transpose(data_cell{i}); %transpose as each column is expected to be a time slice
       cases{i} = cell(N,T);
-      cases{i}(onodes,:) =  num2cell(ev(onodes, :)); 
+      cases{i}(onodes,:) =  num2cell(ev(onodes, :));
+      cases{i}(cellfun(@(x) any(isnan(x)),cases{i})) = empty_cell(1,1);
+      
     end
-    
 end
 
