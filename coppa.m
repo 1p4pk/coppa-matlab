@@ -100,7 +100,7 @@ for j=1:num_datasets
         if strcmp(prediction_mode,'simple')
             [pred rv acc] = prediction_simple(bestoverallbnet, dataTesting);
         else
-            [pred rv pred_prob] = prediction(bestoverallbnet, dataTesting, symptom_variables);
+            [pred rv pred_prob] = prediction(bestoverallbnet, dataTesting, model{i}, symptom_variables);
             %cell2csv('test.csv',pred_prob,";");
         end
 
